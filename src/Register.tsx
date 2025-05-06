@@ -1,0 +1,69 @@
+import React, { useState } from 'react';
+import AuthForm from './AuthForm';
+import styles from './auth.module.css';
+
+const Register: React.FC = () => {
+    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Логика регистрации
+    };
+
+    return (
+        <AuthForm
+            title="Регистрация"
+            submitText="Зарегистрироваться"
+            footerText="Уже есть аккаунт?"
+            footerLinkText="Войти"
+            footerLinkPath="/login"
+            onSubmit={handleSubmit}
+        >
+            <div className={styles.formGroup}>
+                <label className={styles.label}>Имя пользователя</label>
+                <input
+                    type="text"
+                    className={styles.input}
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                />
+            </div>
+            <div className={styles.formGroup}>
+                <label className={styles.label}>Email</label>
+                <input
+                    type="email"
+                    className={styles.input}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                />
+            </div>
+            <div className={styles.formGroup}>
+                <label className={styles.label}>Пароль</label>
+                <input
+                    type="password"
+                    className={styles.input}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                />
+            </div>
+            <div className={styles.formGroup}>
+                <label className={styles.label}>Подтвердите пароль</label>
+                <input
+                    type="password"
+                    className={styles.input}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                />
+            </div>
+        </AuthForm>
+    );
+};
+
+export default Register;
