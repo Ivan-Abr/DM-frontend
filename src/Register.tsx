@@ -1,16 +1,41 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AuthForm from './AuthForm';
 import styles from './auth.module.css';
+import axios from 'axios';
+import api from './api';
 
 const Register: React.FC = () => {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Логика регистрации
+
+        if (password !== confirmPassword) {
+            setError('Пароли не совпадают');
+            return;
+        }
+
+        try {
+            await api.post('http://localhost:8080/api/auth/register', {
+                username,
+                email,
+                password
+            });
+
+            navigate('/login');
+        } catch (err) {
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.message || 'Ошибка регистрации');
+            } else {
+                setError('Произошла неизвестная ошибка');
+            }
+        }
     };
 
     return (

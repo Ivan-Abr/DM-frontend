@@ -1,14 +1,36 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AuthForm from './AuthForm';
 import styles from './auth.module.css';
+import axios from 'axios';
+import api from "./api";
 
 const Login: React.FC = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Логика входа
+
+        try {
+            const response = await api.post('http://localhost:8080/api/auth/login', {
+                username,
+                password
+            });
+
+            // Сохраняем токен в localStorage
+            localStorage.setItem('authToken', response.data.token);
+
+            navigate('/welcome');
+        } catch (err) {
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.message || 'Ошибка входа');
+            } else {
+                setError('Произошла неизвестная ошибка');
+            }
+        }
     };
 
     return (
