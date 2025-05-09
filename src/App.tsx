@@ -1,8 +1,8 @@
 // App.tsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './Login';
-import Register from './Register';
-import Welcome from './Welcome';
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
+import Welcome from './components/auth/Welcome';
 import {JSX} from "react";
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {

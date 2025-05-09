@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthForm from './AuthForm';
-import styles from './auth.module.css';
+import styles from '../../auth.module.css';
 import axios from 'axios';
-import api from "./api";
+import api from "../../api";
 
 const Login: React.FC = () => {
     const [username, setUsername] = useState('');
