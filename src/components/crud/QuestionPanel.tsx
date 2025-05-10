@@ -1,236 +1,173 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Select, Input, Spin, notification } from 'antd';
-import  api  from '../../api';
-import type { ViewQuestionDTO, CreateQuestionDTO, UpdateQuestionDTO } from '../../types';
+import { useEffect, useState } from "react";
+import { Button, Form, Input, Modal, Table, Select } from "antd";
+import api from "../../api";
+import { Layer, Factor, ViewQuestionDTO, CreateQuestionDTO, UpdateQuestionDTO } from "../../types";
 
-interface Layer {
-    id: string;
-    name: string;
-}
-
-interface Factor {
-    id: string;
-    shortname: string;
-    name: string;
-}
+const { Option } = Select;
 
 const QuestionPanel: React.FC = () => {
     const [questions, setQuestions] = useState<ViewQuestionDTO[]>([]);
     const [layers, setLayers] = useState<Layer[]>([]);
     const [factors, setFactors] = useState<Factor[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editQuestion, setEditQuestion] = useState<any | null>(null);
+    const [isModalVisible, setIsModalVisible] = useState(false);
     const [form] = Form.useForm();
 
-    const API_URL = 'http://localhost:8080/api';
-
-    // Загрузка начальных данных
     useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const [questionsRes, layersRes, factorsRes] = await Promise.all([
-                    api.get<ViewQuestionDTO[]>(`${API_URL}/question`),
-                    api.get<Layer[]>(`${API_URL}/layer`),
-                    api.get<Factor[]>(`${API_URL}/factor`)
-                ]);
-
-                setQuestions(questionsRes.data);
-                setLayers(layersRes.data);
-                setFactors(factorsRes.data);
-            } catch (error) {
-                notification.error({
-                    message: 'Ошибка загрузки данных',
-                    description: 'Не удалось загрузить данные с сервера'
-                });
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
+        fetchQuestions();
+        fetchLayers();
+        fetchFactors();
     }, []);
 
-    // Обработчик удаления
+    const fetchQuestions = async () => {
+        try {
+            const response = await api.get("http://localhost:8080/api/question");
+            setQuestions(response.data);
+        } catch (error) {
+            console.error("Ошибка загрузки вопросов: ", error);
+        }
+    };
+
+    const fetchLayers = async () => {
+        try {
+            const response = await api.get("http://localhost:8080/api/layer");
+            setLayers(response.data);
+        } catch (error) {
+            console.error("Ошибка загрузки слоев: ", error);
+        }
+    };
+
+    const fetchFactors = async () => {
+        try {
+            const response = await api.get("http://localhost:8080/api/factor");
+            setFactors(response.data);
+        } catch (error) {
+            console.error("Ошибка загрузки факторов: ", error);
+        }
+    };
+
     const handleDelete = async (id: string) => {
         try {
-            await api.delete(`${API_URL}/question/${id}`);
-            setQuestions(prev => prev.filter(q => q.id !== id));
-            notification.success({
-                message: 'Успешно',
-                description: 'Вопрос успешно удален'
-            });
+            await api.delete(`http://localhost:8080/api/question/${id}`);
+            await fetchQuestions();
         } catch (error) {
-            notification.error({
-                message: 'Ошибка',
-                description: 'Не удалось удалить вопрос'
-            });
+            console.error("Ошибка удаления:", error);
         }
     };
 
-    // Обработчик сохранения формы
-    const handleSubmit = async (values: CreateQuestionDTO | UpdateQuestionDTO) => {
+    const handleSubmit = async (values: any) => {
         try {
-            if (editingId) {
-                // Редактирование существующего вопроса
-                await api.patch(`${API_URL}/question/${editingId}`, values);
-                setQuestions(prev => prev.map(q =>
-                    q.id === editingId ? { ...q, ...values } : q
-                ));
+            if (editQuestion) {
+                await api.patch(`http://localhost:8080/api/question/${editQuestion.id}`, values);
             } else {
-                // Создание нового вопроса
-                const newQuestion = await api.post<ViewQuestionDTO>('${API_URL}/question', values);
-                setQuestions(prev => [...prev, newQuestion.data]);
+                await api.post("http://localhost:8080/api/question", values);
             }
-
+            setIsModalVisible(false);
+            setEditQuestion(null);
             form.resetFields();
-            setEditingId(null);
-            notification.success({
-                message: 'Успешно',
-                description: `Вопрос ${editingId ? 'обновлен' : 'создан'}`
-            });
+            await fetchQuestions();
         } catch (error) {
-            notification.error({
-                message: 'Ошибка',
-                description: `Не удалось ${editingId ? 'обновить' : 'создать'} вопрос`
-            });
+            console.error("Ошибка сохранения:", error);
         }
     };
 
-    // Колонки таблицы
     const columns = [
-        { title: 'Вопрос', dataIndex: 'name', key: 'name' },
-        { title: 'Слой', dataIndex: 'layerName', key: 'layerName' },
-        { title: 'Фактор', dataIndex: 'factorShortname', key: 'factorShortname' },
-        { title: 'Аннотация', dataIndex: 'annotation', key: 'annotation' },
+        { title: "Название", dataIndex: "name", key: "name" },
+        { title: "Слой", dataIndex: "layerName", key: "layerName" },
+        { title: "Фактор", dataIndex: "factorShortname", key: "factorShortname" },
+        { title: "Аннотация", dataIndex: "annotation", key: "annotation" },
         {
-            title: 'Действия',
-            key: 'actions',
-            render: (_: any, record: ViewQuestionDTO) => (
-                <div className="flex gap-2">
-                    <Button onClick={() => {
-                        const layer = layers.find(l => l.name === record.layerName);
-                        const factor = factors.find(f => f.shortname === record.factorShortname);
-
-                        form.setFieldsValue({
-                            ...record,
-                            layerId: layer?.id,
-                            factorId: factor?.id
-                        });
-                        setEditingId(record.id);
-                    }}>
+            title: "Действия",
+            key: "actions",
+            render: (_: any, record: any) => (
+                <>
+                    <Button
+                        onClick={() => {
+                            setEditQuestion(record);
+                            // Найти id слоя и фактора по имени/shortname
+                            const layer = layers.find(l => l.name === record.layerName);
+                            const factor = factors.find(f => f.shortname === record.factorShortname);
+                            form.setFieldsValue({
+                                name: record.name,
+                                annotation: record.annotation,
+                                layerId: layer?.id,
+                                factorId: factor?.id,
+                            });
+                            setIsModalVisible(true);
+                        }}
+                    >
                         Редактировать
                     </Button>
                     <Button danger onClick={() => handleDelete(record.id)}>
                         Удалить
                     </Button>
-                </div>
-            )
-        }
+                </>
+            ),
+        },
     ];
 
     return (
-        <div className="p-4">
-            <Spin spinning={loading}>
-                <div className="mb-4 flex justify-end">
-                    <Button
-                        type="primary"
-                        onClick={() => {
-                            form.resetFields();
-                            setEditingId(null);
-                        }}
+        <div>
+            <Button type="primary" onClick={() => {
+                setEditQuestion(null);
+                form.resetFields();
+                setIsModalVisible(true);
+            }}>
+                Добавить вопрос
+            </Button>
+
+            <Table dataSource={questions} columns={columns} rowKey="id" />
+
+            <Modal
+                title={editQuestion ? "Редактирование вопроса" : "Новый вопрос"}
+                open={isModalVisible}
+                onCancel={() => {
+                    setIsModalVisible(false);
+                    setEditQuestion(null);
+                    form.resetFields();
+                }}
+                onOk={() => form.submit()}
+            >
+                <Form form={form} onFinish={handleSubmit} layout="vertical">
+                    <Form.Item
+                        name="name"
+                        label="Название"
+                        rules={[{ required: true, message: "Введите название" }]}
                     >
-                        Добавить вопрос
-                    </Button>
-                </div>
-
-                <Table
-                    dataSource={questions}
-                    columns={columns}
-                    rowKey="id"
-                    bordered
-                    pagination={{ pageSize: 10 }}
-                />
-
-                {/* Модальное окно для создания/редактирования */}
-                <Modal
-                    title={`${editingId ? 'Редактирование' : 'Создание'} вопроса`}
-                    open={!!editingId || form.isFieldsTouched()}
-                    onCancel={() => {
-                        form.resetFields();
-                        setEditingId(null);
-                    }}
-                    onOk={form.submit}
-                    destroyOnClose
-                    width={800}
-                >
-                    <Form
-                        form={form}
-                        onFinish={handleSubmit}
-                        layout="vertical"
-                        initialValues={{ annotation: '' }}
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        name="layerId"
+                        label="Слой"
+                        rules={[{ required: true, message: "Выберите слой" }]}
                     >
-                        <Form.Item
-                            name="layerId"
-                            label="Слой"
-                            rules={[{ required: !editingId, message: 'Выберите слой' }]}
-                        >
-                            <Select
-                                showSearch
-                                placeholder="Выберите слой"
-                                optionFilterProp="children"
-                                filterOption={(input, option) =>
-                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                }
-                                options={layers.map(l => ({
-                                    value: l.id,
-                                    label: l.name
-                                }))}
-                            />
-                        </Form.Item>
-
-                        <Form.Item
-                            name="factorId"
-                            label="Фактор"
-                            rules={[{ required: !editingId, message: 'Выберите фактор' }]}
-                        >
-                            <Select
-                                showSearch
-                                placeholder="Выберите фактор"
-                                optionFilterProp="children"
-                                filterOption={(input, option) =>
-                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                }
-                                options={factors.map(f => ({
-                                    value: f.id,
-                                    label: `${f.shortname} - ${f.name}`
-                                }))}
-                            />
-                        </Form.Item>
-
-                        <Form.Item
-                            name="name"
-                            label="Текст вопроса"
-                            rules={[
-                                { required: true, message: 'Введите текст вопроса' },
-                                { max: 500, message: 'Максимальная длина 500 символов' }
-                            ]}
-                        >
-                            <Input.TextArea rows={3} showCount />
-                        </Form.Item>
-
-                        <Form.Item
-                            name="annotation"
-                            label="Дополнительная информация"
-                            rules={[{ max: 300, message: 'Максимальная длина 300 символов' }]}
-                        >
-                            <Input.TextArea rows={2} showCount />
-                        </Form.Item>
-                    </Form>
-                </Modal>
-            </Spin>
+                        <Select placeholder="Выберите слой">
+                            {layers.map(layer => (
+                                <Option key={layer.id} value={layer.id}>{layer.name}</Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                    <Form.Item
+                        name="factorId"
+                        label="Фактор"
+                        rules={[{ required: true, message: "Выберите фактор" }]}
+                    >
+                        <Select placeholder="Выберите фактор">
+                            {factors.map(factor => (
+                                <Option key={factor.id} value={factor.id}>{factor.shortname}</Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                    <Form.Item
+                        name="annotation"
+                        label="Аннотация"
+                    >
+                        <Input.TextArea />
+                    </Form.Item>
+                </Form>
+            </Modal>
         </div>
     );
 };
 
-export default QuestionPanel;
+export default QuestionPanel; 

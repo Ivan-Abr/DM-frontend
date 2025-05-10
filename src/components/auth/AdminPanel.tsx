@@ -4,6 +4,7 @@ import AdminRoute from './AdminRoute';
 import LayerPanel from "../crud/LayerPanel";
 import FactorPanel from "../crud/FactorPanel";
 import QuestionPanel from "../crud/QuestionPanel";
+// import QuestionPanel from "../crud/QuestionPanel";
 
 const AdminPanel: React.FC = () => {
     return (
