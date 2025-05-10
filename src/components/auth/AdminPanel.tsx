@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Tabs, Button, notification } from 'antd';
 import AdminRoute from './AdminRoute';
 import LayerPanel from "../crud/LayerPanel";
+import FactorPanel from "../crud/FactorPanel";
+import QuestionsAdmin from "../crud/QuestionPanel";
 
 const AdminPanel: React.FC = () => {
     return (
@@ -11,6 +13,8 @@ const AdminPanel: React.FC = () => {
                 <Tabs
                     items={[
                         { label: 'Слои ЦЗ', key: 'layers', children: <LayerPanel /> },
+                        { label: 'Факторы ЦЗ', key: 'factors', children: <FactorPanel /> },
+                        { label: 'Вопросы', key: 'questions', children: <QuestionsAdmin /> }
                     ]}
                 />
             </div>

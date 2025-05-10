@@ -1,24 +1,24 @@
 import {useEffect, useState} from "react";
-import {Layer} from "../../types";
+import {Factor, FactorUpt} from "../../types";
 import {Button, Form, Input, Modal, Table} from "antd";
 import api from "../../api";
 
 
-const LayerPanel: React.FC = () => {
-    const [layers, setLayers] = useState<Layer[]>([]);
-    const [editLayer, setEditLayer] = useState<Layer | null>(null);
+const FactorPanel: React.FC = () => {
+    const [factors, setFactors] = useState<Factor[]>([]);
+    const [editFactor, setEditFactor] = useState<FactorUpt | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [form] = Form.useForm();
 
     useEffect(() => {
-        fetchLayers();
+        fetchFactors();
     }, []);
 
-    const fetchLayers = async () => {
+    const fetchFactors = async () => {
         try {
             const response = await api
-                .get('http://localhost:8080/api/layer');
-            setLayers(response.data);
+                .get('http://localhost:8080/api/factor');
+            setFactors(response.data);
         } catch (error) {
             console.error('Ошибка загрузки слоев: ', error);
         }
@@ -26,8 +26,8 @@ const LayerPanel: React.FC = () => {
 
     const handleDelete = async (id: string) => {
         try {
-            await api.delete(`http://localhost:8080/api/layer/${id}`)
-            await fetchLayers();
+            await api.delete(`http://localhost:8080/api/factor/${id}`)
+            await fetchFactors();
         } catch (error) {
             console.error('Ошибка удаления:', error);
         }
@@ -35,13 +35,13 @@ const LayerPanel: React.FC = () => {
 
     const handleSubmit = async (values: { name: string }) => {
         try {
-            if (editLayer) {
-                await api.patch(`http://localhost:8080/api/layer/${editLayer.id}`, values);
+            if (editFactor) {
+                await api.patch(`http://localhost:8080/api/factor/${editFactor.id}`, values);
             } else {
-                await api.post('http://localhost:8080/api/layer', values);
+                await api.post('http://localhost:8080/api/factor', values);
             }
             setIsModalVisible(false);
-            await fetchLayers();
+            await fetchFactors();
         } catch (error) {
             console.error('Ошибка сохранения:', error);
         }
@@ -52,10 +52,10 @@ const LayerPanel: React.FC = () => {
         {
             title: 'Действия',
             key: 'actions',
-            render: (_: any, record: Layer) => (
+            render: (_: any, record: Factor) => (
                 <>
                     <Button onClick={() => {
-                        setEditLayer(record);
+                        setEditFactor(record);
                         form.setFieldsValue(record);
                         setIsModalVisible(true);
                     }}>
@@ -72,17 +72,17 @@ const LayerPanel: React.FC = () => {
     return (
         <div>
             <Button type="primary" onClick={() => setIsModalVisible(true)}>
-                Добавить слой
+                Добавить фактор
             </Button>
 
-            <Table dataSource={layers} columns={columns} rowKey="id" />
+            <Table dataSource={factors} columns={columns} rowKey="id" />
 
             <Modal
-                title={editLayer ? 'Редактирование слоя' : 'Новый слой'}
+                title={editFactor ? 'Редактирование фактора' : 'Новый фактор'}
                 open={isModalVisible}
                 onCancel={() => {
                     setIsModalVisible(false);
-                    setEditLayer(null);
+                    setEditFactor(null);
                     form.resetFields();
                 }}
                 onOk={() => form.submit()}
@@ -95,9 +95,16 @@ const LayerPanel: React.FC = () => {
                     >
                         <Input />
                     </Form.Item>
+                    <Form.Item
+                        name="shortname"
+                        label="Краткое наименование"
+                        rules={[{ required: true, message: 'Введите краткое наименование' }]}
+                    >
+                        <Input />
+                    </Form.Item>
                 </Form>
             </Modal>
         </div>
     );
 }
-export default LayerPanel;
+export default FactorPanel;

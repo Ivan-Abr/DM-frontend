@@ -13,5 +13,27 @@ export interface Layer {
 export interface Factor {
     id: string;
     name: string;
-    layerId: number;
+    shortname: string;
+}
+
+export interface FactorUpt {
+    id: string;
+    name: string | null;
+    shortname: string | null;
+}
+
+export interface Question {
+    id: string; // UUID
+    layerId: string;
+    factorId: string;
+    name: string;
+    annotation?: string;
+}
+
+export interface QuestionView {
+    id: string;
+    name: string;
+    layerName: string;
+    factorShortName: string;
+    annotation?: string;
 }
