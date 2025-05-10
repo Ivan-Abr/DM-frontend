@@ -1,10 +1,21 @@
-import React from "react";
+import React, { useState, useEffect } from 'react';
+import { Tabs, Button, notification } from 'antd';
+import AdminRoute from './AdminRoute';
+import LayerPanel from "../crud/LayerPanel";
 
 const AdminPanel: React.FC = () => {
     return (
-        <div className="admin-container">
-            <h1>Hello, Dexter Morgan</h1>
-        </div>
-    )
-}
+        <AdminRoute>
+            <div className="admin-panel">
+                <h1>Административная панель</h1>
+                <Tabs
+                    items={[
+                        { label: 'Слои ЦЗ', key: 'layers', children: <LayerPanel /> },
+                    ]}
+                />
+            </div>
+        </AdminRoute>
+    );
+};
+
 export default AdminPanel;

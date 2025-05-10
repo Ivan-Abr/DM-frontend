@@ -32,8 +32,10 @@ const Login: React.FC = () => {
 
             const decoded: DecodedToken = jwtDecode(token);
             const roles = decoded.roles;
-
-            navigate('/welcome');
+            if (roles.includes("ROLE_ADMIN")) {
+                navigate("/admin-panel");
+            }
+            else navigate('/welcome');
         } catch (err) {
             if (axios.isAxiosError(err)) {
                 setError(err.response?.data?.message || 'Ошибка входа');
