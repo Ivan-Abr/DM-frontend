@@ -22,18 +22,24 @@ export interface FactorUpt {
     shortname: string | null;
 }
 
-export interface Question {
-    id: string; // UUID
+export interface ViewQuestionDTO {
+    id: string;
+    name: string;
+    layerName: string;
+    factorShortname: string;
+    annotation?: string;
+}
+
+export interface CreateQuestionDTO {
     layerId: string;
     factorId: string;
     name: string;
     annotation?: string;
 }
 
-export interface QuestionView {
-    id: string;
-    name: string;
-    layerName: string;
-    factorShortName: string;
+export interface UpdateQuestionDTO {
+    layerId?: string;
+    factorId?: string;
+    name?: string;
     annotation?: string;
 }
