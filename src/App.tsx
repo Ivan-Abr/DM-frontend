@@ -4,6 +4,8 @@ import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Welcome from './components/auth/Welcome';
 import {JSX} from "react";
+import AdminRoute from "./components/auth/AdminRoute";
+import AdminPanel from "./components/auth/AdminPanel";
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
     const authToken = localStorage.getItem('authToken');
@@ -25,6 +27,15 @@ function App() {
                     }
                 />
                 <Route path="/" element={<Navigate to="/login" replace />} />
+                <Route
+                    path="/admin-panel"
+                    element={
+                        <AdminRoute>
+                            <AdminPanel/>
+                        </AdminRoute>
+                    }
+                />
+
             </Routes>
         </Router>
     );

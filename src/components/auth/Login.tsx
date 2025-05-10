@@ -4,6 +4,13 @@ import AuthForm from './AuthForm';
 import styles from '../../auth.module.css';
 import axios from 'axios';
 import api from "../../api";
+import { jwtDecode } from 'jwt-decode';
+
+
+interface DecodedToken {
+    sub: string;
+    roles: string[];
+}
 
 const Login: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -19,9 +26,12 @@ const Login: React.FC = () => {
                 username,
                 password
             });
-
-            // Сохраняем токен в localStorage
+            const token = response.data.token;
             localStorage.setItem('authToken', response.data.token);
+
+
+            const decoded: DecodedToken = jwtDecode(token);
+            const roles = decoded.roles;
 
             navigate('/welcome');
         } catch (err) {
