@@ -2,6 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {jwtDecode} from 'jwt-decode';
 import {DecodedToken} from "../../types";
+import { Button } from 'antd';
+import { UserOutlined } from '@ant-design/icons';
 
 const Welcome: React.FC = () => {
     const navigate = useNavigate();
@@ -27,12 +29,23 @@ const Welcome: React.FC = () => {
 
     return (
         <div className="welcome-container">
-            <h1>
-                {getRole() === 'admin'
-                    ? `Приветствуем, администратор ${getUsername()}!`
-                    : `Привет, ${getUsername()}!`
-                }
-            </h1>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h1>
+                    {getRole() === 'admin'
+                        ? `Приветствуем, администратор ${getUsername()}!`
+                        : `Привет, ${getUsername()}!`
+                    }
+                </h1>
+                {token && (
+                    <Button
+                        icon={<UserOutlined />}
+                        onClick={() => navigate('/user')}
+                        type="default"
+                    >
+                        Профиль
+                    </Button>
+                )}
+            </div>
             <button onClick={handleLogout}>Выйти</button>
         </div>
     );

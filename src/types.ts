@@ -1,5 +1,6 @@
 export interface DecodedToken {
     sub: string;
+    id: string;
     roles: string[];
     iat: number;
     exp: number;
@@ -42,4 +43,43 @@ export interface UpdateQuestionDTO {
     factorId?: string;
     name?: string;
     annotation?: string;
+}
+
+export interface Mark {
+    id: string;
+    questionId: string;
+    annotation: string;
+    value: number;
+}
+
+export interface ViewMarkDTO {
+    id: string;
+    questionId: string;
+    annotation: string;
+    value: number;
+}
+
+export interface CreateMarkDTO {
+    questionId: string;
+    annotation: string;
+    value: number;
+}
+
+export interface UpdateMarkDTO {
+    questionId?: string;
+    annotation?: string;
+    value?: number;
+}
+
+export interface ViewUserDTO {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+}
+
+export interface UpdateUserDTO {
+    name?: string;
+    email?: string;
+    password?: string;
 }

@@ -6,6 +6,7 @@ import Welcome from './components/auth/Welcome';
 import {JSX} from "react";
 import AdminRoute from "./components/auth/AdminRoute";
 import AdminPanel from "./components/auth/AdminPanel";
+import UserPanel from './components/UserPanel';
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
     const authToken = localStorage.getItem('authToken');
@@ -35,7 +36,14 @@ function App() {
                         </AdminRoute>
                     }
                 />
-
+                <Route
+                    path="/user"
+                    element={
+                        <PrivateRoute>
+                            <UserPanel />
+                        </PrivateRoute>
+                    }
+                />
             </Routes>
         </Router>
     );

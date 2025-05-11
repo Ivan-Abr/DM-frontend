@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Button, Form, Input, Modal, Table, Select } from "antd";
+import { Button, Form, Input, Modal, Table, Select, InputNumber, Space, Tag } from "antd";
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import api from "../../api";
-import { Layer, Factor, ViewQuestionDTO, CreateQuestionDTO, UpdateQuestionDTO } from "../../types";
+import { Layer, Factor, ViewQuestionDTO, ViewMarkDTO, CreateMarkDTO, UpdateMarkDTO } from "../../types";
 
 const { Option } = Select;
 
@@ -9,14 +10,24 @@ const QuestionPanel: React.FC = () => {
     const [questions, setQuestions] = useState<ViewQuestionDTO[]>([]);
     const [layers, setLayers] = useState<Layer[]>([]);
     const [factors, setFactors] = useState<Factor[]>([]);
-    const [editQuestion, setEditQuestion] = useState<any | null>(null);
+    const [editQuestion, setEditQuestion] = useState<ViewQuestionDTO | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [form] = Form.useForm();
+
+    const [marks, setMarks] = useState<ViewMarkDTO[]>([]);
+    const [editMark, setEditMark] = useState<ViewMarkDTO | null>(null);
+    const [isMarkModalVisible, setIsMarkModalVisible] = useState(false);
+    const [markForm] = Form.useForm();
+    const [markFormInitialValues, setMarkFormInitialValues] = useState({});
+
+    const [selectedLayer, setSelectedLayer] = useState<string | undefined>(undefined);
+    const [selectedFactor, setSelectedFactor] = useState<string | undefined>(undefined);
 
     useEffect(() => {
         fetchQuestions();
         fetchLayers();
         fetchFactors();
+        fetchMarks();
     }, []);
 
     const fetchQuestions = async () => {
@@ -46,6 +57,15 @@ const QuestionPanel: React.FC = () => {
         }
     };
 
+    const fetchMarks = async () => {
+        try {
+            const response = await api.get("http://localhost:8080/api/mark");
+            setMarks(response.data);
+        } catch (error) {
+            console.error("Ошибка загрузки оценок: ", error);
+        }
+    };
+
     const handleDelete = async (id: string) => {
         try {
             await api.delete(`http://localhost:8080/api/question/${id}`);
@@ -71,20 +91,112 @@ const QuestionPanel: React.FC = () => {
         }
     };
 
+    const handleMarkDelete = async (id: string) => {
+        try {
+            await api.delete(`http://localhost:8080/api/mark/${id}`);
+            await fetchMarks();
+        } catch (error) {
+            console.error("Ошибка удаления оценки:", error);
+        }
+    };
+
+    const handleMarkSubmit = async (values: CreateMarkDTO | UpdateMarkDTO) => {
+        try {
+            console.log('Form values:', values);
+            if (editMark) {
+                console.log('Updating mark:', editMark.id, values);
+                await api.patch(`http://localhost:8080/api/mark/${editMark.id}`, values);
+            } else {
+                const formValues = markForm.getFieldsValue();
+                console.log('All form values:', formValues);
+                
+                const createMarkData: CreateMarkDTO = {
+                    questionId: formValues.questionId,
+                    annotation: values.annotation!,
+                    value: values.value!
+                };
+                console.log('Creating new mark with data:', createMarkData);
+                const response = await api.post("http://localhost:8080/api/mark", createMarkData);
+                console.log('Server response:', response.data);
+            }
+            setIsMarkModalVisible(false);
+            setEditMark(null);
+            markForm.resetFields();
+            await fetchMarks();
+        } catch (error: any) {
+            console.error("Ошибка сохранения оценки:", error);
+            console.error("Request data:", error.config?.data);
+            console.error("Response data:", error.response?.data);
+            console.error("Response status:", error.response?.status);
+        }
+    };
+
+    const filteredQuestions = questions.filter(q => {
+        const layerOk = !selectedLayer || q.layerName === layers.find(l => l.id === selectedLayer)?.name;
+        const factorOk = !selectedFactor || q.factorShortname === factors.find(f => f.id === selectedFactor)?.shortname;
+        return layerOk && factorOk;
+    });
+
     const columns = [
         { title: "Название", dataIndex: "name", key: "name" },
         { title: "Слой", dataIndex: "layerName", key: "layerName" },
         { title: "Фактор", dataIndex: "factorShortname", key: "factorShortname" },
         { title: "Аннотация", dataIndex: "annotation", key: "annotation" },
         {
+            title: "Оценки",
+            key: "marks",
+            render: (_: any, record: ViewQuestionDTO) => {
+                const questionMarks = marks.filter(mark => mark.questionId === record.id);
+                return (
+                    <Space direction="vertical" size="small">
+                        {questionMarks.map((mark, idx) => (
+                            <div key={mark.id || idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Tag color="blue">{mark.value}</Tag>
+                                <span>{mark.annotation}</span>
+                                <Space>
+                                    <Button 
+                                        type="text" 
+                                        icon={<EditOutlined />} 
+                                        onClick={() => {
+                                            setEditMark(mark);
+                                            markForm.setFieldsValue(mark);
+                                            setIsMarkModalVisible(true);
+                                        }}
+                                    />
+                                    <Button 
+                                        type="text" 
+                                        danger 
+                                        icon={<DeleteOutlined />} 
+                                        onClick={() => handleMarkDelete(mark.id)}
+                                    />
+                                </Space>
+                            </div>
+                        ))}
+                        <Button 
+                            type="dashed" 
+                            size="small" 
+                            onClick={() => {
+                                setEditMark(null);
+                                setMarkFormInitialValues({ questionId: record.id, annotation: '', value: undefined });
+                                setIsMarkModalVisible(true);
+                            }}
+                        >
+                            Добавить оценку
+                        </Button>
+                    </Space>
+                );
+            }
+        },
+        {
             title: "Действия",
             key: "actions",
-            render: (_: any, record: any) => (
-                <>
+            render: (_: any, record: ViewQuestionDTO) => (
+                <Space>
                     <Button
+                        type="text"
+                        icon={<EditOutlined />}
                         onClick={() => {
                             setEditQuestion(record);
-                            // Найти id слоя и фактора по имени/shortname
                             const layer = layers.find(l => l.name === record.layerName);
                             const factor = factors.find(f => f.shortname === record.factorShortname);
                             form.setFieldsValue({
@@ -95,19 +207,44 @@ const QuestionPanel: React.FC = () => {
                             });
                             setIsModalVisible(true);
                         }}
-                    >
-                        Редактировать
-                    </Button>
-                    <Button danger onClick={() => handleDelete(record.id)}>
-                        Удалить
-                    </Button>
-                </>
+                    />
+                    <Button 
+                        type="text" 
+                        danger 
+                        icon={<DeleteOutlined />} 
+                        onClick={() => handleDelete(record.id)}
+                    />
+                </Space>
             ),
         },
     ];
 
     return (
         <div>
+            <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
+                <Select
+                    allowClear
+                    placeholder="Фильтр по слою"
+                    style={{ width: 200 }}
+                    value={selectedLayer}
+                    onChange={setSelectedLayer}
+                >
+                    {layers.map(layer => (
+                        <Option key={layer.id} value={layer.id}>{layer.name}</Option>
+                    ))}
+                </Select>
+                <Select
+                    allowClear
+                    placeholder="Фильтр по фактору"
+                    style={{ width: 200 }}
+                    value={selectedFactor}
+                    onChange={setSelectedFactor}
+                >
+                    {factors.map(factor => (
+                        <Option key={factor.id} value={factor.id}>{factor.shortname}</Option>
+                    ))}
+                </Select>
+            </div>
             <Button type="primary" onClick={() => {
                 setEditQuestion(null);
                 form.resetFields();
@@ -116,7 +253,11 @@ const QuestionPanel: React.FC = () => {
                 Добавить вопрос
             </Button>
 
-            <Table dataSource={questions} columns={columns} rowKey="id" />
+            <Table
+                dataSource={filteredQuestions}
+                columns={columns}
+                rowKey="id"
+            />
 
             <Modal
                 title={editQuestion ? "Редактирование вопроса" : "Новый вопрос"}
@@ -163,6 +304,50 @@ const QuestionPanel: React.FC = () => {
                         label="Аннотация"
                     >
                         <Input.TextArea />
+                    </Form.Item>
+                </Form>
+            </Modal>
+
+            <Modal
+                title={editMark ? "Редактирование оценки" : "Новая оценка"}
+                open={isMarkModalVisible}
+                onCancel={() => {
+                    setIsMarkModalVisible(false);
+                    setEditMark(null);
+                    markForm.resetFields();
+                }}
+                onOk={() => {
+                    const formValues = markForm.getFieldsValue();
+                    console.log('Form values before submit:', formValues);
+                    markForm.submit();
+                }}
+            >
+                <Form
+                    form={markForm}
+                    initialValues={markFormInitialValues}
+                    onFinish={handleMarkSubmit}
+                    layout="vertical"
+                    onValuesChange={(changedValues, allValues) => {
+                        console.log('Form values changed:', changedValues);
+                        console.log('All form values:', allValues);
+                    }}
+                >
+                    <Form.Item name="questionId" style={{ display: 'none' }}>
+                        <Input type="hidden" />
+                    </Form.Item>
+                    <Form.Item
+                        name="annotation"
+                        label="Аннотация"
+                        rules={[{ required: true, message: "Введите аннотацию" }]}
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        name="value"
+                        label="Значение"
+                        rules={[{ required: true, message: "Введите значение" }]}
+                    >
+                        <InputNumber />
                     </Form.Item>
                 </Form>
             </Modal>

@@ -49,6 +49,7 @@ const FactorPanel: React.FC = () => {
 
     const columns = [
         { title: 'Название', dataIndex: 'name', key: 'name' },
+        { title: 'Краткое наименование', dataIndex: 'shortname', key: 'shortname' },
         {
             title: 'Действия',
             key: 'actions',
