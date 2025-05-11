@@ -3,6 +3,7 @@ import { Button, Form, Input, Modal, Table, Select, InputNumber, Space, Tag } fr
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import api from "../../api";
 import { Layer, Factor, ViewQuestionDTO, ViewMarkDTO, CreateMarkDTO, UpdateMarkDTO } from "../../types";
+import { defaultMarks } from '../../data/defaultMarks';
 
 const { Option } = Select;
 
@@ -63,6 +64,7 @@ const QuestionPanel: React.FC = () => {
             setMarks(response.data);
         } catch (error) {
             console.error("Ошибка загрузки оценок: ", error);
+            setMarks(defaultMarks.map(m => ({ ...m, id: `default-${m.questionId}-${m.value}` })));
         }
     };
 
