@@ -52,19 +52,34 @@ const UserPanel: React.FC = () => {
   if (!user) return <div>Загрузка...</div>;
 
   return (
-    <div style={{ maxWidth: 400, margin: '40px auto' }}>
-      <Card title="Личный кабинет" bordered>
+    <div style={{ background: '#f5f7fa', minHeight: '100vh', paddingTop: 0 }}>
+      <div style={{ background: '#1a237e', padding: '24px 0 24px 32px', marginBottom: 32 }}>
+        <h1 style={{ color: '#fff', textAlign: 'left', margin: 0, fontWeight: 700, fontSize: 28 }}>
+          Профиль пользователя
+        </h1>
+      </div>
+      <div
+        style={{
+          maxWidth: 500,
+          margin: '0 auto',
+          background: '#fff',
+          borderRadius: 16,
+          boxShadow: '0 2px 12px #e3eafc',
+          padding: '32px 32px 24px 32px',
+        }}
+      >
         <Typography.Paragraph><b>Имя:</b> {user.name}</Typography.Paragraph>
         <Typography.Paragraph><b>Email:</b> {user.email}</Typography.Paragraph>
         <Typography.Paragraph><b>Роль:</b> {user.role}</Typography.Paragraph>
-        <Button type="primary" onClick={handleEdit}>Редактировать</Button>
-      </Card>
+        <Button type="primary" onClick={handleEdit} style={{ background: '#1a237e', borderColor: '#1a237e' }}>Редактировать</Button>
+      </div>
       <Modal
         title="Редактировать данные"
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         onOk={() => form.submit()}
         confirmLoading={loading}
+        bodyStyle={{ background: '#fff' }}
       >
         <Form form={form} onFinish={handleSubmit} layout="vertical">
           <Form.Item name="name" label="Имя" rules={[{ required: true, message: 'Введите имя' }]}>

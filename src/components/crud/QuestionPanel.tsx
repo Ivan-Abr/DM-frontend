@@ -35,7 +35,7 @@ const QuestionPanel: React.FC = () => {
             const response = await api.get("http://localhost:8080/api/question");
             setQuestions(response.data);
         } catch (error) {
-            console.error("Ошибка загрузки вопросов: ", error);
+            console.error("Ошибка загрузки показателей: ", error);
         }
     };
 
@@ -220,47 +220,21 @@ const QuestionPanel: React.FC = () => {
     ];
 
     return (
-        <div>
-            <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
-                <Select
-                    allowClear
-                    placeholder="Фильтр по слою"
-                    style={{ width: 200 }}
-                    value={selectedLayer}
-                    onChange={setSelectedLayer}
-                >
-                    {layers.map(layer => (
-                        <Option key={layer.id} value={layer.id}>{layer.name}</Option>
-                    ))}
-                </Select>
-                <Select
-                    allowClear
-                    placeholder="Фильтр по фактору"
-                    style={{ width: 200 }}
-                    value={selectedFactor}
-                    onChange={setSelectedFactor}
-                >
-                    {factors.map(factor => (
-                        <Option key={factor.id} value={factor.id}>{factor.shortname}</Option>
-                    ))}
-                </Select>
-            </div>
+        <div style={{ padding: '32px 0 0 0', background: '#f5f7fa', minHeight: '100vh' }}>
             <Button type="primary" onClick={() => {
                 setEditQuestion(null);
                 form.resetFields();
                 setIsModalVisible(true);
-            }}>
-                Добавить вопрос
+            }} style={{ marginBottom: 24, background: '#1a237e', borderColor: '#1a237e' }}>
+                Добавить показатель
             </Button>
-
             <Table
                 dataSource={filteredQuestions}
                 columns={columns}
                 rowKey="id"
             />
-
             <Modal
-                title={editQuestion ? "Редактирование вопроса" : "Новый вопрос"}
+                title={editQuestion ? "Редактирование показателя" : "Новый показатель"}
                 open={isModalVisible}
                 onCancel={() => {
                     setIsModalVisible(false);
@@ -268,6 +242,7 @@ const QuestionPanel: React.FC = () => {
                     form.resetFields();
                 }}
                 onOk={() => form.submit()}
+                bodyStyle={{ background: '#fff' }}
             >
                 <Form form={form} onFinish={handleSubmit} layout="vertical">
                     <Form.Item

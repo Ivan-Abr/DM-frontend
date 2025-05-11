@@ -7,6 +7,7 @@ import {JSX} from "react";
 import AdminRoute from "./components/auth/AdminRoute";
 import AdminPanel from "./components/auth/AdminPanel";
 import UserPanel from './components/UserPanel';
+import ExpertPanel from "./components/ExpertPanel";
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
     const authToken = localStorage.getItem('authToken');
@@ -34,6 +35,12 @@ function App() {
                         <AdminRoute>
                             <AdminPanel/>
                         </AdminRoute>
+                    }
+                />
+                <Route
+                    path="/expert-panel"
+                    element={
+                        <ExpertPanel/>
                     }
                 />
                 <Route

@@ -34,6 +34,8 @@ const Login: React.FC = () => {
             const roles = decoded.roles;
             if (roles.includes("ROLE_ADMIN")) {
                 navigate("/admin-panel");
+            } else if (roles.includes("ROLE_USER")){
+                navigate("/expert-panel");
             }
             else navigate('/welcome');
         } catch (err) {

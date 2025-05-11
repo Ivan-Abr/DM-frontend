@@ -83,3 +83,25 @@ export interface UpdateUserDTO {
     email?: string;
     password?: string;
 }
+
+export interface ViewOrganizationDTO {
+    id: string;
+    expertId: string;
+    name: string;
+    annotation: string;
+    contacts: string;
+}
+
+export interface CreateOrganizationDTO {
+    expertId: string;
+    name: string;
+    annotation: string;
+    contacts: string;
+}
+
+export interface UpdateOrganizationDTO {
+    expertId?: string;
+    name?: string;
+    annotation?: string;
+    contacts?: string;
+}

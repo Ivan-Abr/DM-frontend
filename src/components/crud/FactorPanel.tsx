@@ -71,13 +71,11 @@ const FactorPanel: React.FC = () => {
     ];
 
     return (
-        <div>
-            <Button type="primary" onClick={() => setIsModalVisible(true)}>
+        <div style={{ padding: '32px 0 0 0', background: '#f5f7fa', minHeight: '100vh' }}>
+            <Button type="primary" onClick={() => setIsModalVisible(true)} style={{ marginBottom: 24, background: '#1a237e', borderColor: '#1a237e' }}>
                 Добавить фактор
             </Button>
-
             <Table dataSource={factors} columns={columns} rowKey="id" />
-
             <Modal
                 title={editFactor ? 'Редактирование фактора' : 'Новый фактор'}
                 open={isModalVisible}
@@ -87,6 +85,7 @@ const FactorPanel: React.FC = () => {
                     form.resetFields();
                 }}
                 onOk={() => form.submit()}
+                bodyStyle={{ background: '#fff' }}
             >
                 <Form form={form} onFinish={handleSubmit}>
                     <Form.Item
