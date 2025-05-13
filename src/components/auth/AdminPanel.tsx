@@ -31,7 +31,7 @@ const AdminPanel: React.FC = () => {
                     onClick={() => setShowCrud(true)}
                     bodyStyle={{ padding: 32 }}
                 >
-                    <h2 style={{ color: '#1a237e', marginBottom: 16 }}>Управление слоями, факторами и вопросами</h2>
+                    <h2 style={{ color: '#1a237e', marginBottom: 16 }}>Управление данными</h2>
                     <div style={{ color: '#607d8b', marginBottom: 16 }}>Перейти к управлению всеми сущностями системы</div>
                     <Button type="primary" style={{ background: '#1a237e', borderColor: '#1a237e' }}>Перейти</Button>
                 </Card>

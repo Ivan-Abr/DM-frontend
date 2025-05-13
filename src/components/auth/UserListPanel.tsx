@@ -79,7 +79,7 @@ const UserListPanel: React.FC = () => {
           ))}
         </Space>
         <Divider />
-        <h2 style={{ color: '#1a237e' }}>Пользователи</h2>
+        <h2 style={{ color: '#1a237e' }}>Эксперты</h2>
         <Space direction="vertical" style={{ width: '100%' }} size={16}>
           {regularUsers.map(user => (
             <Card key={user.id} style={{ background: '#f8fafc', borderRadius: 12 }}>
@@ -110,7 +110,7 @@ const UserListPanel: React.FC = () => {
                   onClick={() => handleRoleChange(user)}
                   style={{ marginLeft: 16 }}
                 >
-                  {user.role === 'BANNED' ? 'Разблокировать' : 'Забанить'}
+                  {user.role === 'BANNED' ? 'Разблокировать' : 'Заблокировать'}
                 </Button>
               </div>
             </Card>
