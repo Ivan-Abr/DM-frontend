@@ -3,6 +3,7 @@ import { Tabs } from 'antd';
 import LayerPanel from '../crud/LayerPanel';
 import FactorPanel from '../crud/FactorPanel';
 import QuestionPanel from '../crud/QuestionPanel';
+import MilestonePanel from "../crud/MilestonePanel";
 
 const AdminCrudPanel: React.FC = () => {
   return (
@@ -27,7 +28,8 @@ const AdminCrudPanel: React.FC = () => {
           items={[
             { label: 'Слои ЦЗ', key: 'layers', children: <LayerPanel /> },
             { label: 'Факторы ЦЗ', key: 'factors', children: <FactorPanel /> },
-            { label: 'Показатели', key: 'questions', children: <QuestionPanel /> }
+            { label: 'Показатели', key: 'questions', children: <QuestionPanel /> },
+              {label: 'Вехи', key: 'milestones', children: <MilestonePanel />}
           ]}
         />
       </div>

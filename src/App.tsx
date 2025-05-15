@@ -9,6 +9,7 @@ import AdminPanel from "./components/auth/AdminPanel";
 import UserPanel from './components/UserPanel';
 import ExpertPanel from "./components/ExpertPanel";
 import OrganizationPanel from './components/OrganizationPanel';
+import TestComponent from './components/TestComponent';
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
     const authToken = localStorage.getItem('authToken');
@@ -55,6 +56,10 @@ function App() {
                 <Route
                     path="/organization/:id"
                     element={<OrganizationPanel />}
+                />
+                <Route
+                    path="/organization/:organizationId/test"
+                    element={<TestComponent />}
                 />
             </Routes>
         </Router>

@@ -160,7 +160,13 @@ const ExpertPanel: React.FC = () => {
                             style={{ color: '#607d8b' }}
                         />
                       </Popconfirm>
-                      <Button type="dashed" style={{ color: '#1a237e', borderColor: '#e3eafc' }}>Начать опрос</Button>
+                      <Button 
+                        type="dashed" 
+                        style={{ color: '#1a237e', borderColor: '#e3eafc' }}
+                        onClick={() => navigate(`/organization/${org.id}/test`)}
+                      >
+                        Начать опрос
+                      </Button>
                     </Space>
                   }
               >
