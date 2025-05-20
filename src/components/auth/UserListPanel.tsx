@@ -47,7 +47,7 @@ const UserListPanel: React.FC = () => {
           newRole: newRole
         }
       });
-      const response = await api.patch(`/api/user/${user.id}`, requestData);
+      const response = await api.patch(`http://localhost:8080/api/user/${user.id}`, requestData);
       console.log('Ответ сервера на смену роли:', response.data);
       message.success('Роль изменена');
       await fetchUsers();
