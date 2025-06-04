@@ -28,13 +28,19 @@ const QuestionPanel: React.FC = () => {
         fetchQuestions();
         fetchLayers();
         fetchFactors();
-        fetchMarks();
     }, []);
 
     const fetchQuestions = async () => {
         try {
             const response = await api.get("http://localhost:8080/api/question");
             setQuestions(response.data);
+            // Fetch marks for each question
+            const marksPromises = response.data.map((question: ViewQuestionDTO) =>
+                api.get(`http://localhost:8080/api/mark/question/${question.id}`)
+            );
+            const marksResponses = await Promise.all(marksPromises);
+            const allMarks = marksResponses.flatMap(response => response.data);
+            setMarks(allMarks);
         } catch (error) {
             console.error("Ошибка загрузки показателей: ", error);
         }
@@ -58,16 +64,6 @@ const QuestionPanel: React.FC = () => {
         }
     };
 
-    const fetchMarks = async () => {
-        try {
-            const response = await api.get("http://localhost:8080/api/mark");
-            setMarks(response.data);
-        } catch (error) {
-            console.error("Ошибка загрузки оценок: ", error);
-            setMarks(defaultMarks.map(m => ({ ...m, id: `default-${m.questionId}-${m.value}` })));
-        }
-    };
-
     const handleDelete = async (id: string) => {
         try {
             await api.delete(`http://localhost:8080/api/question/${id}`);
@@ -79,10 +75,17 @@ const QuestionPanel: React.FC = () => {
 
     const handleSubmit = async (values: any) => {
         try {
+            const updateData = {
+                name: values.name,
+                annotation: values.annotation,
+                layerId: values.layerId,
+                factorId: values.factorId
+            };
+
             if (editQuestion) {
-                await api.patch(`http://localhost:8080/api/question/${editQuestion.id}`, values);
+                await api.patch(`http://localhost:8080/api/question/${editQuestion.id}`, updateData);
             } else {
-                await api.post("http://localhost:8080/api/question", values);
+                await api.post("http://localhost:8080/api/question", updateData);
             }
             setIsModalVisible(false);
             setEditQuestion(null);
@@ -96,7 +99,7 @@ const QuestionPanel: React.FC = () => {
     const handleMarkDelete = async (id: string) => {
         try {
             await api.delete(`http://localhost:8080/api/mark/${id}`);
-            await fetchMarks();
+            await fetchQuestions();
         } catch (error) {
             console.error("Ошибка удаления оценки:", error);
         }
@@ -124,7 +127,7 @@ const QuestionPanel: React.FC = () => {
             setIsMarkModalVisible(false);
             setEditMark(null);
             markForm.resetFields();
-            await fetchMarks();
+            await fetchQuestions();
         } catch (error: any) {
             console.error("Ошибка сохранения оценки:", error);
             console.error("Request data:", error.config?.data);
@@ -153,38 +156,10 @@ const QuestionPanel: React.FC = () => {
                     <Space direction="vertical" size="small">
                         {questionMarks.map((mark, idx) => (
                             <div key={mark.id || idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <Tag color="blue">{mark.value}</Tag>
+                                <span style={{ fontWeight: 500, color: '#1a237e' }}>{mark.value}</span>
                                 <span>{mark.annotation}</span>
-                                <Space>
-                                    <Button 
-                                        type="text" 
-                                        icon={<EditOutlined />} 
-                                        onClick={() => {
-                                            setEditMark(mark);
-                                            markForm.setFieldsValue(mark);
-                                            setIsMarkModalVisible(true);
-                                        }}
-                                    />
-                                    <Button 
-                                        type="text" 
-                                        danger 
-                                        icon={<DeleteOutlined />} 
-                                        onClick={() => handleMarkDelete(mark.id)}
-                                    />
-                                </Space>
                             </div>
                         ))}
-                        <Button 
-                            type="dashed" 
-                            size="small" 
-                            onClick={() => {
-                                setEditMark(null);
-                                setMarkFormInitialValues({ questionId: record.id, annotation: '', value: undefined });
-                                setIsMarkModalVisible(true);
-                            }}
-                        >
-                            Добавить оценку
-                        </Button>
                     </Space>
                 );
             }

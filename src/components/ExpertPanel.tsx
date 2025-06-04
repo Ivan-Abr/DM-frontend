@@ -5,15 +5,6 @@ import { ViewOrganizationDTO, CreateOrganizationDTO, UpdateOrganizationDTO, Deco
 import { jwtDecode}  from 'jwt-decode';
 import { EditOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import {
-  ResponsiveContainer,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  Legend,
-} from 'recharts';
 
 const ExpertPanel: React.FC = () => {
   const [organizations, setOrganizations] = useState<ViewOrganizationDTO[]>([]);
@@ -97,32 +88,6 @@ const ExpertPanel: React.FC = () => {
     }
   };
 
-  const generateRadarData = () => {
-    return layers.map(layer => ({
-      subject: layer.name,
-      desired: Math.floor(Math.random() * 2) + 2, // 2-3
-      actual: Math.floor(Math.random() * 3) + 1, // 0-2
-    }));
-  };
-
-  const RadarChartComponent = () => {
-    const data = generateRadarData();
-    return (
-        <div style={{ width: 600, height: 240 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <RadarChart cx="50%" cy="50%" outerRadius={90} data={data}>
-              <PolarGrid />
-              <PolarAngleAxis dataKey="subject" />
-              <PolarRadiusAxis angle={30} domain={[0, 3]} />
-              <Radar name="Желаемое" dataKey="desired" stroke="#4caf50" fill="#4caf50" fillOpacity={0.3} />
-              <Radar name="Действительное" dataKey="actual" stroke="#2196f3" fill="#2196f3" fillOpacity={0.3} />
-              <Legend />
-            </RadarChart>
-          </ResponsiveContainer>
-        </div>
-    );
-  };
-
   return (
       <div style={{ maxWidth: 1200, margin: '40px auto', padding: 24, background: '#f5f7fa', borderRadius: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
@@ -170,21 +135,16 @@ const ExpertPanel: React.FC = () => {
                     </Space>
                   }
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch' }}>
-                  <div style={{ flex: '0 1 50%' }}>
-                    <div><b>Аннотация:</b> {org.annotation}</div>
-                    <div><b>Контакты:</b> {org.contacts}</div>
-                    <Button
-                      type="link"
-                      style={{ padding: 0, marginTop: 8 }}
-                      onClick={() => navigate(`/organization/${org.id}`)}
-                    >
-                      Подробнее
-                    </Button>
-                  </div>
-                  <div style={{ flex: '0 1 50%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <RadarChartComponent />
-                  </div>
+                <div>
+                  <div style={{ marginBottom: 8 }}><b>Аннотация:</b> {org.annotation}</div>
+                  <div style={{ marginBottom: 8 }}><b>Контакты:</b> {org.contacts}</div>
+                  <Button
+                    type="link"
+                    style={{ padding: 0 }}
+                    onClick={() => navigate(`/organization/${org.id}`)}
+                  >
+                    Подробнее
+                  </Button>
                 </div>
               </Card>
           ))}
