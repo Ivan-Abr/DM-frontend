@@ -2,20 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Card, Button, Radio, Space, message } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../api';
-import { ViewQuestionDTO } from '../types';
-
-const defaultMarks = [
-    { value: 0, annotation: 'Вербально, "на ходу"' },
-    { value: 1, annotation: 'Задачи ставятся с помощью Email, мессенджеров, телефонных звонков' },
-    { value: 2, annotation: 'Применяется набор средств автоматизации постановки задач, например, система электронного документооборота, Битрикс 24 и др.' },
-    { value: 3, annotation: 'Комплексная интегрированная система с элементами искусственного интеллекта и цифровыми сервисами (BI-системы)' }
-];
+import { ViewQuestionDTO, ViewMarkDTO } from '../types';
 
 const TestComponent: React.FC = () => {
     const [questions, setQuestions] = useState<ViewQuestionDTO[]>([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
     const [answers, setAnswers] = useState<{ [key: string]: number }>({});
+    const [currentMarks, setCurrentMarks] = useState<ViewMarkDTO[]>([]);
     const navigate = useNavigate();
     const { organizationId } = useParams();
 
@@ -23,32 +17,64 @@ const TestComponent: React.FC = () => {
         fetchQuestions();
     }, []);
 
+    useEffect(() => {
+        console.log('Current question index changed:', currentQuestionIndex);
+        if (questions.length > 0) {
+            console.log('Fetching marks for question:', questions[currentQuestionIndex].id);
+            fetchMarksForQuestion(questions[currentQuestionIndex].id);
+            setSelectedAnswer(null);
+        }
+    }, [currentQuestionIndex, questions]);
+
     const fetchQuestions = async () => {
         try {
             const response = await api.get("http://localhost:8080/api/question");
+            console.log('Fetched questions:', response.data);
             setQuestions(response.data);
         } catch (error) {
+            console.error('Error fetching questions:', error);
             message.error("Ошибка загрузки вопросов");
         }
     };
 
+    const fetchMarksForQuestion = async (questionId: string) => {
+        try {
+            const response = await api.get(`http://localhost:8080/api/mark/question/${questionId}`);
+            console.log('Fetched marks for question:', response.data);
+            setCurrentMarks(response.data);
+        } catch (error) {
+            console.error('Error fetching marks:', error);
+            message.error("Ошибка загрузки вариантов ответа");
+        }
+    };
+
     const handleAnswer = () => {
+        console.log('Handling answer:', { selectedAnswer, currentQuestionIndex });
+        
         if (selectedAnswer === null) {
             message.warning("Пожалуйста, выберите ответ");
             return;
         }
 
         const currentQuestion = questions[currentQuestionIndex];
-        setAnswers(prev => ({
-            ...prev,
-            [currentQuestion.id]: selectedAnswer
-        }));
+        console.log('Current question:', currentQuestion);
 
+        // Сохраняем ответ
+        setAnswers(prev => {
+            const newAnswers = {
+                ...prev,
+                [currentQuestion.id]: selectedAnswer
+            };
+            console.log('Updated answers:', newAnswers);
+            return newAnswers;
+        });
+
+        // Переходим к следующему вопросу или завершаем тест
         if (currentQuestionIndex < questions.length - 1) {
-            setCurrentQuestionIndex(prev => prev + 1);
-            setSelectedAnswer(null);
+            console.log('Moving to next question');
+            setCurrentQuestionIndex(currentQuestionIndex + 1);
         } else {
-            // Save results and navigate to organization panel
+            console.log('Test completed, saving results');
             saveResults();
             navigate(`/organization/${organizationId}`);
         }
@@ -56,15 +82,23 @@ const TestComponent: React.FC = () => {
 
     const saveResults = async () => {
         try {
+            console.log('Saving results:', answers);
             // Here you would implement the logic to save the test results
             // This could be a new API endpoint to save the organization's test results
             message.success("Результаты тестирования сохранены");
         } catch (error) {
+            console.error('Error saving results:', error);
             message.error("Ошибка при сохранении результатов");
         }
     };
 
     const currentQuestion = questions[currentQuestionIndex];
+    console.log('Rendering with:', { 
+        currentQuestionIndex, 
+        questionsLength: questions.length, 
+        currentQuestion, 
+        selectedAnswer 
+    });
 
     return (
         <div style={{ maxWidth: 800, margin: '40px auto', padding: 24 }}>
@@ -79,12 +113,15 @@ const TestComponent: React.FC = () => {
                             <p>{currentQuestion.annotation}</p>
                         </div>
                         <Radio.Group
-                            onChange={(e) => setSelectedAnswer(e.target.value)}
+                            onChange={(e) => {
+                                console.log('Answer selected:', e.target.value);
+                                setSelectedAnswer(e.target.value);
+                            }}
                             value={selectedAnswer}
                         >
                             <Space direction="vertical">
-                                {defaultMarks.map((mark, index) => (
-                                    <Radio key={index} value={mark.value}>
+                                {currentMarks.map((mark) => (
+                                    <Radio key={mark.id} value={mark.value}>
                                         {mark.annotation}
                                     </Radio>
                                 ))}

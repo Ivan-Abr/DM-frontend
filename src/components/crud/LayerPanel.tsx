@@ -44,10 +44,18 @@ const LayerPanel: React.FC = () => {
                 await api.post('http://localhost:8080/api/layer', values);
             }
             setIsModalVisible(false);
+            setEditLayer(null);
+            form.resetFields();
             await fetchLayers();
         } catch (error) {
             console.error('Ошибка сохранения:', error);
         }
+    };
+
+    const showModal = () => {
+        setEditLayer(null);
+        form.resetFields();
+        setIsModalVisible(true);
     };
 
     const columns = [
@@ -81,7 +89,7 @@ const LayerPanel: React.FC = () => {
 
     return (
         <div style={{ padding: '32px 0 0 0', background: '#f5f7fa', minHeight: '100vh' }}>
-            <Button type="primary" onClick={() => setIsModalVisible(true)} style={{ marginBottom: 24, background: '#1a237e', borderColor: '#1a237e' }}>
+            <Button type="primary" onClick={showModal} style={{ marginBottom: 24, background: '#1a237e', borderColor: '#1a237e' }}>
                 Добавить слой
             </Button>
             <Table dataSource={layers} columns={columns} rowKey="id" />

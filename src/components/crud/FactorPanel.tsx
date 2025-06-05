@@ -2,6 +2,7 @@ import {useEffect, useState} from "react";
 import {Factor, FactorUpt} from "../../types";
 import {Button, Form, Input, Modal, Table} from "antd";
 import api from "../../api";
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 
 
 const FactorPanel: React.FC = () => {
@@ -55,16 +56,23 @@ const FactorPanel: React.FC = () => {
             key: 'actions',
             render: (_: any, record: Factor) => (
                 <>
-                    <Button onClick={() => {
-                        setEditFactor(record);
-                        form.setFieldsValue(record);
-                        setIsModalVisible(true);
-                    }}>
-                        Редактировать
-                    </Button>
-                    <Button danger onClick={() => handleDelete(record.id)}>
-                        Удалить
-                    </Button>
+                    <Button
+                        icon={<EditOutlined />}
+                        onClick={() => {
+                            setEditFactor(record);
+                            form.setFieldsValue(record);
+                            setIsModalVisible(true);
+                        }}
+                        type="text"
+                        style={{ color: '#1a237e' }}
+                    />
+                    <Button
+                        icon={<DeleteOutlined />}
+                        danger
+                        type="text"
+                        style={{ color: '#607d8b' }}
+                        onClick={() => handleDelete(record.id)}
+                    />
                 </>
             )
         }

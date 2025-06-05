@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Button, Form, Input, Modal, Table, Select, InputNumber, Space, Tag } from "antd";
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Button, Form, Input, Modal, Table, Select, InputNumber, Space, Tag, Divider } from "antd";
+import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import api from "../../api";
 import { Layer, Factor, ViewQuestionDTO, ViewMarkDTO, CreateMarkDTO, UpdateMarkDTO } from "../../types";
 import { defaultMarks } from '../../data/defaultMarks';
@@ -136,6 +136,22 @@ const QuestionPanel: React.FC = () => {
         }
     };
 
+    const handleAddMark = (questionId: string) => {
+        setEditMark(null);
+        markForm.setFieldsValue({ questionId });
+        setIsMarkModalVisible(true);
+    };
+
+    const handleEditMark = (mark: ViewMarkDTO) => {
+        setEditMark(mark);
+        markForm.setFieldsValue({
+            questionId: mark.questionId,
+            annotation: mark.annotation,
+            value: mark.value
+        });
+        setIsMarkModalVisible(true);
+    };
+
     const filteredQuestions = questions.filter(q => {
         const layerOk = !selectedLayer || q.layerName === layers.find(l => l.id === selectedLayer)?.name;
         const factorOk = !selectedFactor || q.factorShortname === factors.find(f => f.id === selectedFactor)?.shortname;
@@ -220,6 +236,7 @@ const QuestionPanel: React.FC = () => {
                 }}
                 onOk={() => form.submit()}
                 bodyStyle={{ background: '#fff' }}
+                width={800}
             >
                 <Form form={form} onFinish={handleSubmit} layout="vertical">
                     <Form.Item
@@ -257,6 +274,60 @@ const QuestionPanel: React.FC = () => {
                     >
                         <Input.TextArea />
                     </Form.Item>
+
+                    {editQuestion && (
+                        <>
+                            <Divider>Оценки</Divider>
+                            <div style={{ marginBottom: 16 }}>
+                                <Button 
+                                    type="primary" 
+                                    icon={<PlusOutlined />}
+                                    onClick={() => handleAddMark(editQuestion.id)}
+                                    style={{ background: '#1a237e', borderColor: '#1a237e' }}
+                                >
+                                    Добавить оценку
+                                </Button>
+                            </div>
+                            <Table
+                                dataSource={marks.filter(mark => mark.questionId === editQuestion.id)}
+                                rowKey="id"
+                                pagination={false}
+                                columns={[
+                                    {
+                                        title: "Значение",
+                                        dataIndex: "value",
+                                        key: "value",
+                                        width: 100,
+                                    },
+                                    {
+                                        title: "Аннотация",
+                                        dataIndex: "annotation",
+                                        key: "annotation",
+                                    },
+                                    {
+                                        title: "Действия",
+                                        key: "actions",
+                                        width: 100,
+                                        render: (_: any, record: ViewMarkDTO) => (
+                                            <Space>
+                                                <Button
+                                                    type="text"
+                                                    icon={<EditOutlined />}
+                                                    onClick={() => handleEditMark(record)}
+                                                />
+                                                <Button
+                                                    type="text"
+                                                    danger
+                                                    icon={<DeleteOutlined />}
+                                                    onClick={() => handleMarkDelete(record.id)}
+                                                />
+                                            </Space>
+                                        ),
+                                    },
+                                ]}
+                            />
+                        </>
+                    )}
                 </Form>
             </Modal>
 
@@ -268,11 +339,7 @@ const QuestionPanel: React.FC = () => {
                     setEditMark(null);
                     markForm.resetFields();
                 }}
-                onOk={() => {
-                    const formValues = markForm.getFieldsValue();
-                    console.log('Form values before submit:', formValues);
-                    markForm.submit();
-                }}
+                onOk={() => markForm.submit()}
             >
                 <Form
                     form={markForm}
