@@ -1,15 +1,10 @@
 import {useEffect, useState} from "react";
-import {Button, Form, DatePicker, InputNumber, Modal, Table} from "antd";
+import {Button, Form, DatePicker, InputNumber, Modal, Table, Space} from "antd";
 import api from "../../api";
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-
-interface Milestone {
-    id: string;
-    dateFrom: string;
-    dateTo: string;
-    year: number;
-}
+import { Milestone } from "../../types";
+import { API_ENDPOINTS } from "../../config";
 
 interface CreateMilestoneDTO {
     dateFrom: string;
@@ -35,39 +30,40 @@ const MilestonePanel: React.FC = () => {
 
     const fetchMilestones = async () => {
         try {
-            const response = await api.get('http://localhost:8080/api/milestone');
+            const response = await api.get(API_ENDPOINTS.MILESTONE.BASE);
             setMilestones(response.data);
         } catch (error) {
-            console.error('Ошибка загрузки вех: ', error);
+            console.error("Ошибка загрузки вех: ", error);
         }
     };
 
     const handleDelete = async (id: string) => {
         try {
-            await api.delete(`http://localhost:8080/api/milestone/${id}`);
+            await api.delete(API_ENDPOINTS.MILESTONE.BY_ID(id));
             await fetchMilestones();
         } catch (error) {
-            console.error('Ошибка удаления:', error);
+            console.error("Ошибка удаления:", error);
         }
     };
 
     const handleSubmit = async (values: any) => {
         try {
             const formattedValues = {
-                dateFrom: values.dateFrom.format('YYYY-MM-DD'),
-                dateTo: values.dateTo.format('YYYY-MM-DD'),
-                year: values.year
+                ...values,
+                date: values.date.format('YYYY-MM-DD')
             };
 
             if (editMilestone) {
-                await api.patch(`http://localhost:8080/api/milestone/${editMilestone.id}`, formattedValues);
+                await api.patch(API_ENDPOINTS.MILESTONE.BY_ID(editMilestone.id), formattedValues);
             } else {
-                await api.post('http://localhost:8080/api/milestone', formattedValues);
+                await api.post(API_ENDPOINTS.MILESTONE.BASE, formattedValues);
             }
             setIsModalVisible(false);
+            setEditMilestone(null);
+            form.resetFields();
             await fetchMilestones();
         } catch (error) {
-            console.error('Ошибка сохранения:', error);
+            console.error("Ошибка сохранения:", error);
         }
     };
 

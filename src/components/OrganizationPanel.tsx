@@ -8,6 +8,7 @@ import {
   Radar,
   Legend
 } from 'recharts';
+import { API_ENDPOINTS } from '../config';
 
 // Заглушки для примера
 const org = {
@@ -37,7 +38,7 @@ const OrganizationPanel: React.FC = () => {
         setError(null);
         
         // Log the URL we're trying to fetch
-        const url = `http://localhost:8080/api/answer/all/org/${id}`;
+        const url = API_ENDPOINTS.ANSWER.ALL_BY_ORG(id!);
         console.log('Fetching from URL:', url);
 
         const response = await fetch(url, {

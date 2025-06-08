@@ -1,9 +1,10 @@
 import {useEffect, useState} from "react";
 import {Layer} from "../../types";
-import {Button, Form, Input, Modal, Table} from "antd";
+import {Button, Form, Input, Modal, Table, Space} from "antd";
 import api from "../../api";
 import { EditOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from "../../config";
 
 
 const LayerPanel: React.FC = () => {
@@ -20,35 +21,35 @@ const LayerPanel: React.FC = () => {
     const fetchLayers = async () => {
         try {
             const response = await api
-                .get('http://localhost:8080/api/layer');
+                .get(API_ENDPOINTS.LAYER.BASE);
             setLayers(response.data);
         } catch (error) {
-            console.error('Ошибка загрузки слоев: ', error);
+            console.error("Ошибка загрузки слоев: ", error);
         }
     };
 
     const handleDelete = async (id: string) => {
         try {
-            await api.delete(`http://localhost:8080/api/layer/${id}`)
+            await api.delete(API_ENDPOINTS.LAYER.BY_ID(id))
             await fetchLayers();
         } catch (error) {
-            console.error('Ошибка удаления:', error);
+            console.error("Ошибка удаления:", error);
         }
     };
 
-    const handleSubmit = async (values: { name: string }) => {
+    const handleSubmit = async (values: any) => {
         try {
             if (editLayer) {
-                await api.patch(`http://localhost:8080/api/layer/${editLayer.id}`, values);
+                await api.patch(API_ENDPOINTS.LAYER.BY_ID(editLayer.id), values);
             } else {
-                await api.post('http://localhost:8080/api/layer', values);
+                await api.post(API_ENDPOINTS.LAYER.BASE, values);
             }
             setIsModalVisible(false);
             setEditLayer(null);
             form.resetFields();
             await fetchLayers();
         } catch (error) {
-            console.error('Ошибка сохранения:', error);
+            console.error("Ошибка сохранения:", error);
         }
     };
 

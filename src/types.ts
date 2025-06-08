@@ -124,3 +124,10 @@ export interface UpdateRecommendationDTO {
     value?: number;
     annotation?: string;
 }
+
+export interface Milestone {
+    id: string;
+    dateFrom: string;
+    dateTo: string;
+    year: number;
+}

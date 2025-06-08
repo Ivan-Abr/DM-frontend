@@ -3,6 +3,7 @@ import { Button, Form, Input, Modal, Table, Select, InputNumber, Space, Tag, Div
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import api from "../../api";
 import { Layer, Factor, ViewQuestionDTO, ViewMarkDTO, CreateMarkDTO, UpdateMarkDTO } from "../../types";
+import { API_ENDPOINTS } from "../../config";
 import { defaultMarks } from '../../data/defaultMarks';
 
 const { Option } = Select;
@@ -32,11 +33,11 @@ const QuestionPanel: React.FC = () => {
 
     const fetchQuestions = async () => {
         try {
-            const response = await api.get("http://localhost:8080/api/question");
+            const response = await api.get(API_ENDPOINTS.QUESTION.BASE);
             setQuestions(response.data);
             // Fetch marks for each question
             const marksPromises = response.data.map((question: ViewQuestionDTO) =>
-                api.get(`http://localhost:8080/api/mark/question/${question.id}`)
+                api.get(API_ENDPOINTS.MARK.BY_QUESTION(question.id))
             );
             const marksResponses = await Promise.all(marksPromises);
             const allMarks = marksResponses.flatMap(response => response.data);
@@ -48,7 +49,7 @@ const QuestionPanel: React.FC = () => {
 
     const fetchLayers = async () => {
         try {
-            const response = await api.get("http://localhost:8080/api/layer");
+            const response = await api.get(API_ENDPOINTS.LAYER.BASE);
             setLayers(response.data);
         } catch (error) {
             console.error("Ошибка загрузки слоев: ", error);
@@ -57,7 +58,7 @@ const QuestionPanel: React.FC = () => {
 
     const fetchFactors = async () => {
         try {
-            const response = await api.get("http://localhost:8080/api/factor");
+            const response = await api.get(API_ENDPOINTS.FACTOR.BASE);
             setFactors(response.data);
         } catch (error) {
             console.error("Ошибка загрузки факторов: ", error);
@@ -66,7 +67,7 @@ const QuestionPanel: React.FC = () => {
 
     const handleDelete = async (id: string) => {
         try {
-            await api.delete(`http://localhost:8080/api/question/${id}`);
+            await api.delete(API_ENDPOINTS.QUESTION.BY_ID(id));
             await fetchQuestions();
         } catch (error) {
             console.error("Ошибка удаления:", error);
@@ -83,9 +84,9 @@ const QuestionPanel: React.FC = () => {
             };
 
             if (editQuestion) {
-                await api.patch(`http://localhost:8080/api/question/${editQuestion.id}`, updateData);
+                await api.patch(API_ENDPOINTS.QUESTION.BY_ID(editQuestion.id), updateData);
             } else {
-                await api.post("http://localhost:8080/api/question", updateData);
+                await api.post(API_ENDPOINTS.QUESTION.BASE, updateData);
             }
             setIsModalVisible(false);
             setEditQuestion(null);
@@ -98,7 +99,7 @@ const QuestionPanel: React.FC = () => {
 
     const handleMarkDelete = async (id: string) => {
         try {
-            await api.delete(`http://localhost:8080/api/mark/${id}`);
+            await api.delete(API_ENDPOINTS.MARK.BY_ID(id));
             await fetchQuestions();
         } catch (error) {
             console.error("Ошибка удаления оценки:", error);
@@ -110,7 +111,7 @@ const QuestionPanel: React.FC = () => {
             console.log('Form values:', values);
             if (editMark) {
                 console.log('Updating mark:', editMark.id, values);
-                await api.patch(`http://localhost:8080/api/mark/${editMark.id}`, values);
+                await api.patch(API_ENDPOINTS.MARK.BY_ID(editMark.id), values);
             } else {
                 const formValues = markForm.getFieldsValue();
                 console.log('All form values:', formValues);
@@ -121,7 +122,7 @@ const QuestionPanel: React.FC = () => {
                     value: values.value!
                 };
                 console.log('Creating new mark with data:', createMarkData);
-                const response = await api.post("http://localhost:8080/api/mark", createMarkData);
+                const response = await api.post(API_ENDPOINTS.MARK.BASE, createMarkData);
                 console.log('Server response:', response.data);
             }
             setIsMarkModalVisible(false);

@@ -3,6 +3,7 @@ import { Button, Form, Input, Modal, Table, Select, InputNumber, Space } from "a
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import api from "../../api";
 import { Layer, ViewRecommendationDTO, CreateRecommendationDTO, UpdateRecommendationDTO } from "../../types";
+import { API_ENDPOINTS } from "../../config";
 
 const { Option } = Select;
 
@@ -22,7 +23,7 @@ const RecommendationPanel: React.FC = () => {
 
     const fetchRecommendations = async () => {
         try {
-            const response = await api.get("http://localhost:8080/api/recommendation");
+            const response = await api.get(API_ENDPOINTS.RECOMMENDATION.BASE);
             setRecommendations(response.data);
         } catch (error) {
             console.error("Ошибка загрузки рекомендаций: ", error);
@@ -31,7 +32,7 @@ const RecommendationPanel: React.FC = () => {
 
     const fetchLayers = async () => {
         try {
-            const response = await api.get("http://localhost:8080/api/layer");
+            const response = await api.get(API_ENDPOINTS.LAYER.BASE);
             setLayers(response.data);
         } catch (error) {
             console.error("Ошибка загрузки слоев: ", error);
@@ -40,7 +41,7 @@ const RecommendationPanel: React.FC = () => {
 
     const handleDelete = async (id: string) => {
         try {
-            await api.delete(`http://localhost:8080/api/recommendation/${id}`);
+            await api.delete(API_ENDPOINTS.RECOMMENDATION.BY_ID(id));
             await fetchRecommendations();
         } catch (error) {
             console.error("Ошибка удаления:", error);
@@ -56,9 +57,9 @@ const RecommendationPanel: React.FC = () => {
             };
 
             if (editRecommendation) {
-                await api.patch(`http://localhost:8080/api/recommendation/${editRecommendation.id}`, updateData);
+                await api.patch(API_ENDPOINTS.RECOMMENDATION.BY_ID(editRecommendation.id), updateData);
             } else {
-                await api.post("http://localhost:8080/api/recommendation", updateData);
+                await api.post(API_ENDPOINTS.RECOMMENDATION.BASE, updateData);
             }
             setIsModalVisible(false);
             setEditRecommendation(null);

@@ -1,8 +1,9 @@
 import {useEffect, useState} from "react";
 import {Factor, FactorUpt} from "../../types";
-import {Button, Form, Input, Modal, Table} from "antd";
+import {Button, Form, Input, Modal, Table, Space} from "antd";
 import api from "../../api";
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { API_ENDPOINTS } from "../../config";
 
 
 const FactorPanel: React.FC = () => {
@@ -18,33 +19,35 @@ const FactorPanel: React.FC = () => {
     const fetchFactors = async () => {
         try {
             const response = await api
-                .get('http://localhost:8080/api/factor');
+                .get(API_ENDPOINTS.FACTOR.BASE);
             setFactors(response.data);
         } catch (error) {
-            console.error('Ошибка загрузки слоев: ', error);
+            console.error("Ошибка загрузки факторов: ", error);
         }
     };
 
     const handleDelete = async (id: string) => {
         try {
-            await api.delete(`http://localhost:8080/api/factor/${id}`)
+            await api.delete(API_ENDPOINTS.FACTOR.BY_ID(id))
             await fetchFactors();
         } catch (error) {
-            console.error('Ошибка удаления:', error);
+            console.error("Ошибка удаления:", error);
         }
     };
 
-    const handleSubmit = async (values: { name: string }) => {
+    const handleSubmit = async (values: any) => {
         try {
             if (editFactor) {
-                await api.patch(`http://localhost:8080/api/factor/${editFactor.id}`, values);
+                await api.patch(API_ENDPOINTS.FACTOR.BY_ID(editFactor.id), values);
             } else {
-                await api.post('http://localhost:8080/api/factor', values);
+                await api.post(API_ENDPOINTS.FACTOR.BASE, values);
             }
             setIsModalVisible(false);
+            setEditFactor(null);
+            form.resetFields();
             await fetchFactors();
         } catch (error) {
-            console.error('Ошибка сохранения:', error);
+            console.error("Ошибка сохранения:", error);
         }
     };
 
