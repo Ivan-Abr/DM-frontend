@@ -4,6 +4,7 @@ import LayerPanel from '../crud/LayerPanel';
 import FactorPanel from '../crud/FactorPanel';
 import QuestionPanel from '../crud/QuestionPanel';
 import MilestonePanel from "../crud/MilestonePanel";
+import RecommendationPanel from "../crud/RecommendationPanel";
 
 const AdminCrudPanel: React.FC = () => {
   return (
@@ -29,7 +30,8 @@ const AdminCrudPanel: React.FC = () => {
             { label: 'Слои ЦЗ', key: 'layers', children: <LayerPanel /> },
             { label: 'Факторы ЦЗ', key: 'factors', children: <FactorPanel /> },
             { label: 'Показатели', key: 'questions', children: <QuestionPanel /> },
-              {label: 'Вехи', key: 'milestones', children: <MilestonePanel />}
+            { label: 'Вехи', key: 'milestones', children: <MilestonePanel /> },
+            { label: 'Рекомендации', key: 'recommendations', children: <RecommendationPanel /> }
           ]}
         />
       </div>

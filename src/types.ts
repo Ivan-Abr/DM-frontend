@@ -105,3 +105,22 @@ export interface UpdateOrganizationDTO {
     annotation?: string;
     contacts?: string;
 }
+
+export interface ViewRecommendationDTO {
+    id: string;
+    layerName: string;
+    value: number;
+    annotation: string;
+}
+
+export interface CreateRecommendationDTO {
+    layerId: string;
+    value: number;
+    annotation: string;
+}
+
+export interface UpdateRecommendationDTO {
+    layerId?: string;
+    value?: number;
+    annotation?: string;
+}
