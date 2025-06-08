@@ -5,11 +5,12 @@ import styles from '../../auth.module.css';
 import axios from 'axios';
 import api from "../../api";
 import { jwtDecode } from 'jwt-decode';
-
+import { API_ENDPOINTS } from '../../config';
 
 interface DecodedToken {
     sub: string;
     roles: string[];
+    exp: number;
 }
 
 const Login: React.FC = () => {
@@ -22,7 +23,7 @@ const Login: React.FC = () => {
         e.preventDefault();
 
         try {
-            const response = await api.post('http://localhost:8080/api/auth/login', {
+            const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, {
                 username,
                 password
             });
@@ -32,10 +33,12 @@ const Login: React.FC = () => {
 
             const decoded: DecodedToken = jwtDecode(token);
             const roles = decoded.roles;
-            if (roles.includes("ROLE_ADMIN")) {
-                navigate("/admin-panel");
-            } else if (roles.includes("ROLE_USER")){
-                navigate("/expert-panel");
+
+            if (roles.includes('ROLE_ADMIN')) {
+                navigate('/admin');
+            }
+            else if (roles.includes('ROLE_EXPERT')) {
+                navigate('/expert');
             }
             else navigate('/welcome');
         } catch (err) {
@@ -49,34 +52,33 @@ const Login: React.FC = () => {
 
     return (
         <AuthForm
-            title="Добро пожаловать"
+            title="Вход в систему"
             submitText="Войти"
-            footerText="Нет аккаунта?"
-            footerLinkText="Зарегистрироваться"
+            footerText="Нет аккаунта? Зарегистрируйтесь"
+            footerLinkText="Регистрация"
             footerLinkPath="/register"
             showLogo={true}
             onSubmit={handleSubmit}
         >
             <div className={styles.formGroup}>
-                <label className={styles.label}>Имя пользователя</label>
                 <input
                     type="text"
-                    className={styles.input}
+                    placeholder="Имя пользователя"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    required
+                    className={styles.input}
                 />
             </div>
             <div className={styles.formGroup}>
-                <label className={styles.label}>Пароль</label>
                 <input
                     type="password"
-                    className={styles.input}
+                    placeholder="Пароль"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    required
+                    className={styles.input}
                 />
             </div>
+            {error && <div className={styles.error}>{error}</div>}
         </AuthForm>
     );
 };
