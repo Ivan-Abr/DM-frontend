@@ -20,7 +20,6 @@ const org = {
 interface LayerData {
   score: number;
   layerName: string;
-  factorName: string;
   organizationName: string;
   year: number;
 }
@@ -76,15 +75,14 @@ const OrganizationPanel: React.FC = () => {
         }
 
         const transformedData = data.map((item: any[]) => {
-          if (!Array.isArray(item) || item.length < 5) {
+          if (!Array.isArray(item) || item.length < 4) {
             throw new Error("Invalid item format in data array");
           }
           return {
             score: Number(item[0]),
             layerName: String(item[1]),
-            factorName: String(item[2]),
-            organizationName: String(item[3]),
-            year: Number(item[4])
+            organizationName: String(item[2]),
+            year: Number(item[3])
           };
         });
 
@@ -205,7 +203,7 @@ const OrganizationPanel: React.FC = () => {
             return (
               <p key={layer.layerName} style={{ marginBottom: 12 }}>
                 <b>{layer.layerName}</b><b><span style={{ color: '#000' }}> (</span>
-                <span style={{ color }}>{layer.score}</span>
+                <span style={{ color }}>{Number(layer.score.toFixed(2)).toString()}</span>
                 <span style={{ color }}>/</span>
                 <span style={{ color }}>3</span>
                 <span style={{ color: '#000' }}>)</span></b>
