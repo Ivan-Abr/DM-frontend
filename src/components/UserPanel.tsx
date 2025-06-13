@@ -3,6 +3,7 @@ import { Button, Modal, Form, Input, Card, Typography, message } from 'antd';
 import api from '../api';
 import { ViewUserDTO, UpdateUserDTO, DecodedToken } from '../types';
 import { jwtDecode } from 'jwt-decode';
+import {API_ENDPOINTS} from "../config";
 
 const UserPanel: React.FC = () => {
   const [user, setUser] = useState<ViewUserDTO | null>(null);
@@ -20,7 +21,7 @@ const UserPanel: React.FC = () => {
 
   const fetchUser = async () => {
     try {
-      const response = await api.get(`http://localhost:8080/api/user/${id}`);
+      const response = await api.get(API_ENDPOINTS.USER.BY_ID(id));
       setUser(response.data);
     } catch (error) {
       message.error('Ошибка загрузки данных пользователя');
@@ -38,7 +39,7 @@ const UserPanel: React.FC = () => {
     setLoading(true);
     try {
       if (!user) return;
-      await api.patch(`http://localhost:8080/api/user/${user.id}`, values);
+      await api.patch(API_ENDPOINTS.USER.BY_ID(id), values);
       message.success('Данные успешно обновлены');
       setIsModalVisible(false);
       await fetchUser();

@@ -76,9 +76,9 @@ const RecommendationPanel: React.FC = () => {
 
     const columns = [
         { title: "Слой", dataIndex: "layerName", key: "layerName" },
-        { 
-            title: "Значение", 
-            dataIndex: "value", 
+        {
+            title: "Значение",
+            dataIndex: "value",
             key: "value",
             render: (value: number) => Number(value.toFixed(2)).toString()
         },
@@ -102,10 +102,10 @@ const RecommendationPanel: React.FC = () => {
                             setIsModalVisible(true);
                         }}
                     />
-                    <Button 
-                        type="text" 
-                        danger 
-                        icon={<DeleteOutlined />} 
+                    <Button
+                        type="text"
+                        danger
+                        icon={<DeleteOutlined />}
                         onClick={() => handleDelete(record.id)}
                     />
                 </Space>
@@ -125,7 +125,7 @@ const RecommendationPanel: React.FC = () => {
             <Table
                 dataSource={filteredRecommendations}
                 columns={columns}
-                rowKey="id"
+                rowKey={record => record.id}
             />
             <Modal
                 title={editRecommendation ? "Редактирование рекомендации" : "Новая рекомендация"}
@@ -171,4 +171,4 @@ const RecommendationPanel: React.FC = () => {
     );
 };
 
-export default RecommendationPanel; 
+export default RecommendationPanel;

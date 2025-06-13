@@ -5,6 +5,7 @@ import { ViewOrganizationDTO, CreateOrganizationDTO, UpdateOrganizationDTO, Deco
 import { jwtDecode}  from 'jwt-decode';
 import { EditOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import {API_ENDPOINTS} from "../config";
 
 const ExpertPanel: React.FC = () => {
   const [organizations, setOrganizations] = useState<ViewOrganizationDTO[]>([]);
@@ -22,12 +23,11 @@ const ExpertPanel: React.FC = () => {
   useEffect(() => {
     fetchOrganizations();
     fetchLayers();
-    // eslint-disable-next-line
   }, []);
 
   const fetchOrganizations = async () => {
     try {
-      const response = await api.get(`http://localhost:8080/api/organization/user/${expertId}`);
+      const response = await api.get(API_ENDPOINTS.ORGANIZATION.BY_EXPERT(expertId));
       setOrganizations(response.data);
     } catch (error) {
       message.error('Ошибка загрузки организаций');
@@ -36,7 +36,7 @@ const ExpertPanel: React.FC = () => {
 
   const fetchLayers = async () => {
     try {
-      const response = await api.get('http://localhost:8080/api/layer');
+      const response = await api.get(API_ENDPOINTS.LAYER.BASE);
       setLayers(response.data);
       console.log('Загруженные слои:', response.data);
     } catch (error) {
@@ -59,7 +59,7 @@ const ExpertPanel: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      await api.delete(`http://localhost:8080/api/organization/${id}`);
+      await api.delete(API_ENDPOINTS.ORGANIZATION.BY_ID(id));
       message.success('Организация удалена');
       await fetchOrganizations();
     } catch (error) {
@@ -71,10 +71,10 @@ const ExpertPanel: React.FC = () => {
     setLoading(true);
     try {
       if (editOrg) {
-        await api.patch(`http://localhost:8080/api/organization/${editOrg.id}`, { ...values, expertId });
+        await api.patch(API_ENDPOINTS.ORGANIZATION.BY_ID(editOrg.id), { ...values, expertId });
         message.success('Организация обновлена');
       } else {
-        await api.post(`http://localhost:8080/api/organization`, { ...values, expertId });
+        await api.post(API_ENDPOINTS.ORGANIZATION.BASE, { ...values, expertId });
         message.success('Организация создана');
       }
       setIsModalVisible(false);

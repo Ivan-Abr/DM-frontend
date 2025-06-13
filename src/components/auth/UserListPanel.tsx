@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, Button, Space, message, Tag, Divider } from 'antd';
 import api from '../../api';
 import { ViewUserDTO, ViewOrganizationDTO } from '../../types';
+import {API_ENDPOINTS} from "../../config";
 
 const UserListPanel: React.FC = () => {
   const [users, setUsers] = useState<ViewUserDTO[]>([]);
@@ -15,7 +16,7 @@ const UserListPanel: React.FC = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await api.get('http://localhost:8080/api/user');
+      const response = await api.get(API_ENDPOINTS.USER.BASE);
       setUsers(response.data);
     } catch (error) {
       message.error('Ошибка загрузки пользователей');
@@ -24,7 +25,7 @@ const UserListPanel: React.FC = () => {
 
   const fetchOrgs = async () => {
     try {
-      const response = await api.get('http://localhost:8080/api/organization');
+      const response = await api.get(API_ENDPOINTS.ORGANIZATION.BASE);
       setOrgs(response.data);
     } catch (error) {
       message.error('Ошибка загрузки организаций');
@@ -47,7 +48,7 @@ const UserListPanel: React.FC = () => {
           newRole: newRole
         }
       });
-      const response = await api.patch(`http://localhost:8080/api/user/${user.id}`, requestData);
+      const response = await api.patch(API_ENDPOINTS.USER.BY_ID(user.id), requestData);
       console.log('Ответ сервера на смену роли:', response.data);
       message.success('Роль изменена');
       await fetchUsers();

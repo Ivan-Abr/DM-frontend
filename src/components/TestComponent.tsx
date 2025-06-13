@@ -3,6 +3,7 @@ import { Card, Button, Radio, Space, message } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../api';
 import { ViewQuestionDTO, ViewMarkDTO } from '../types';
+import {API_ENDPOINTS} from "../config";
 
 interface AnswerRequest {
     organizationId: string;
@@ -32,7 +33,7 @@ const TestComponent: React.FC = () => {
 
     const fetchQuestions = async () => {
         try {
-            const response = await api.get("http://localhost:8080/api/question");
+            const response = await api.get(API_ENDPOINTS.QUESTION.BASE);
             setQuestions(response.data);
         } catch (error) {
             message.error("Ошибка загрузки вопросов");
@@ -41,7 +42,7 @@ const TestComponent: React.FC = () => {
 
     const fetchMarksForQuestion = async (questionId: string) => {
         try {
-            const response = await api.get(`http://localhost:8080/api/mark/question/${questionId}`);
+            const response = await api.get(API_ENDPOINTS.MARK.BY_QUESTION(questionId));
             setCurrentMarks(response.data);
         } catch (error) {
             message.error("Ошибка загрузки вариантов ответа");
@@ -61,7 +62,7 @@ const TestComponent: React.FC = () => {
                 milestoneId: null
             };
 
-            await api.post('http://localhost:8080/api/answer', answerData);
+            await api.post(API_ENDPOINTS.ANSWER.BASE, answerData);
             return true;
         } catch (error) {
             console.error('Error saving answer:', error);
