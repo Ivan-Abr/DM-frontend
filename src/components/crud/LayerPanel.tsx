@@ -1,17 +1,21 @@
 import {useEffect, useState} from "react";
 import {Layer} from "../../types";
-import {Button, Form, Input, Modal, Table, Space} from "antd";
+import {Button, Form, Input, Modal, Table, Space, InputNumber} from "antd";
 import api from "../../api";
-import { EditOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { API_ENDPOINTS } from "../../config";
 
+interface LayerFormData {
+    name: string;
+    desiredValue: number;
+}
 
 const LayerPanel: React.FC = () => {
     const [layers, setLayers] = useState<Layer[]>([]);
     const [editLayer, setEditLayer] = useState<Layer | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [form] = Form.useForm();
+    const [form] = Form.useForm<LayerFormData>();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -37,7 +41,7 @@ const LayerPanel: React.FC = () => {
         }
     };
 
-    const handleSubmit = async (values: any) => {
+    const handleSubmit = async (values: LayerFormData) => {
         try {
             if (editLayer) {
                 await api.patch(API_ENDPOINTS.LAYER.BY_ID(editLayer.id), values);
@@ -61,6 +65,12 @@ const LayerPanel: React.FC = () => {
 
     const columns = [
         { title: 'Название', dataIndex: 'name', key: 'name' },
+        { 
+            title: 'Желаемое значение', 
+            dataIndex: 'desiredValue', 
+            key: 'desiredValue',
+            render: (value: number) => value.toFixed(2)
+        },
         {
             title: 'Действия',
             key: 'actions',
@@ -112,6 +122,13 @@ const LayerPanel: React.FC = () => {
                         rules={[{ required: true, message: 'Введите название' }]}
                     >
                         <Input />
+                    </Form.Item>
+                    <Form.Item
+                        name="desiredValue"
+                        label="Желаемое значение"
+                        rules={[{ required: true, message: 'Введите желаемое значение' }]}
+                    >
+                        <InputNumber min={0} max={5} step={0.1} style={{ width: '100%' }} />
                     </Form.Item>
                 </Form>
             </Modal>
