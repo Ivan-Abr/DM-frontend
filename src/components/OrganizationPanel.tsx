@@ -9,6 +9,7 @@ import {
   Legend
 } from 'recharts';
 import { API_ENDPOINTS } from '../config';
+import api from '../api';
 
 // Заглушки для примера
 const org = {
@@ -23,13 +24,53 @@ interface LayerData {
   layerName: string;
   organizationName: string;
   year: number;
+  layerId: string;
+}
+
+interface Recommendation {
+  layerName: string;
+  value: number;
+  annotation: string;
+}
+
+interface Layer {
+  id: string;
+  name: string;
 }
 
 const OrganizationPanel: React.FC = () => {
   const { id } = useParams();
   const [layerData, setLayerData] = useState<LayerData[]>([]);
+  const [layers, setLayers] = useState<Layer[]>([]);
+  const [recommendations, setRecommendations] = useState<{ [key: string]: Recommendation }>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const fetchLayers = async () => {
+    try {
+      const response = await api.get(API_ENDPOINTS.LAYER.BASE);
+      console.log('Загруженные слои:', response.data);
+      setLayers(response.data);
+    } catch (error) {
+      console.error("Ошибка загрузки слоев:", error);
+    }
+  };
+
+  const fetchRecommendation = async (layerName: string, score: number, layerId: string) => {
+    try {
+      const difference = 3 - score;
+      console.log(`Запрос рекомендации для слоя ${layerId} с разницей ${difference}`);
+
+      const response = await api.get(`/api/recommendation/value/${difference}/layer/${layerId}`);
+      console.log('Полученная рекомендация:', response.data);
+      setRecommendations(prev => ({
+        ...prev,
+        [layerName]: response.data
+      }));
+    } catch (error) {
+      console.error(`Ошибка получения рекомендации для слоя ${layerName}:`, error);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,7 +78,9 @@ const OrganizationPanel: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        // Log the URL we're trying to fetch
+        // Сначала загружаем слои
+        await fetchLayers();
+        
         const url = API_ENDPOINTS.ANSWER.ALL_BY_ORG(id!);
         console.log('Fetching from URL:', url);
 
@@ -49,10 +92,6 @@ const OrganizationPanel: React.FC = () => {
           },
         });
 
-        // Log the response details
-        console.log('Response status:', response.status);
-        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
         if (!response.ok) {
           const errorText = await response.text();
           console.error('Error response body:', errorText);
@@ -60,8 +99,6 @@ const OrganizationPanel: React.FC = () => {
         }
         
         const contentType = response.headers.get("content-type");
-        console.log('Content-Type:', contentType);
-
         if (!contentType || !contentType.includes("application/json")) {
           const text = await response.text();
           console.error('Received non-JSON response:', text);
@@ -69,25 +106,36 @@ const OrganizationPanel: React.FC = () => {
         }
 
         const data = await response.json();
-        console.log('Received data:', data);
+        console.log('Received raw data:', data);
         
         if (!Array.isArray(data)) {
           throw new Error("Invalid data format received");
         }
 
-        const transformedData = data.map((item: any[]) => {
-          if (!Array.isArray(item) || item.length < 4) {
-            throw new Error("Invalid item format in data array");
+        const transformedData = data.map((item: any[], index: number) => {
+          console.log(`Processing item ${index}:`, item);
+          if (!Array.isArray(item) || item.length < 5) {
+            console.error('Invalid item format:', item);
+            throw new Error(`Invalid item format in data array at index ${index}`);
           }
           return {
             score: Number(item[0]),
             layerName: String(item[1]),
             organizationName: String(item[2]),
-            year: Number(item[3])
+            year: Number(item[3]),
+            layerId: String(item[4])
           };
         });
 
+        console.log('Transformed data:', transformedData);
         setLayerData(transformedData);
+
+        // Загружаем рекомендации для каждого слоя
+        console.log('Начинаем загрузку рекомендаций для слоев:', transformedData);
+        for (const layer of transformedData) {
+          await fetchRecommendation(layer.layerName, layer.score, layer.layerId);
+        }
+
       } catch (error) {
         console.error('Error fetching data:', error);
         setError(error instanceof Error ? error.message : 'Failed to fetch data');
@@ -193,22 +241,35 @@ const OrganizationPanel: React.FC = () => {
         <div style={{ marginTop: 24 }}>
           <h3 style={{ color: '#1a237e', marginBottom: 16 }}>Рекомендации на основе результатов</h3>
           {layerData.map((layer) => {
-            const difference = 3 - layer.score; // Assuming desired score is always 3
-            let color = '#4caf50'; // green
+            const difference = 3 - layer.score;
+            let color = '#4caf50';
             if (difference >= 1.6) {
-              color = '#f44336'; // red
+              color = '#f44336';
             } else if (difference >= 0.8) {
-              color = '#ffc107'; // yellow
+              color = '#ffc107';
             }
             
+            const recommendation = recommendations[layer.layerName];
+            
             return (
-              <p key={layer.layerName} style={{ marginBottom: 12 }}>
-                <b>{layer.layerName}</b><b><span style={{ color: '#000' }}> (</span>
-                <span style={{ color }}>{Number(layer.score.toFixed(2)).toString()}</span>
-                <span style={{ color }}>/</span>
-                <span style={{ color }}>3</span>
-                <span style={{ color: '#000' }}>)</span></b>
-              </p>
+              <div key={layer.layerName} style={{ marginBottom: 24 }}>
+                <p style={{ marginBottom: 8 }}>
+                  <b>{layer.layerName}</b><b><span style={{ color: '#000' }}> (</span>
+                  <span style={{ color }}>{Number(layer.score.toFixed(2)).toString()}</span>
+                  <span style={{ color }}>/</span>
+                  <span style={{ color }}>3</span>
+                  <span style={{ color: '#000' }}>)</span></b>
+                  {recommendation && (
+                    <span style={{ 
+                      color: '#666',
+                      fontSize: '0.9em',
+                      marginLeft: '8px'
+                    }}>
+                      : {recommendation.annotation}
+                    </span>
+                  )}
+                </p>
+              </div>
             );
           })}
         </div>
