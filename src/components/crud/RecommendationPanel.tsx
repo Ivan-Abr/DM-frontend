@@ -24,7 +24,15 @@ const RecommendationPanel: React.FC = () => {
     const fetchRecommendations = async () => {
         try {
             const response = await api.get(API_ENDPOINTS.RECOMMENDATION.BASE);
-            setRecommendations(response.data);
+            console.log('Полученные данные с сервера:', response.data);
+            // Проверяем наличие id в каждой записи
+            const recommendationsWithId = response.data.map((rec: any) => {
+                if (!rec.id) {
+                    console.error('Запись без id:', rec);
+                }
+                return rec;
+            });
+            setRecommendations(recommendationsWithId);
         } catch (error) {
             console.error("Ошибка загрузки рекомендаций: ", error);
         }
@@ -40,8 +48,15 @@ const RecommendationPanel: React.FC = () => {
     };
 
     const handleDelete = async (id: string) => {
+        if (!id) {
+            console.error("ID не может быть пустым");
+            return;
+        }
         try {
-            await api.delete(API_ENDPOINTS.RECOMMENDATION.BY_ID(id));
+            const url = API_ENDPOINTS.RECOMMENDATION.BY_ID(id);
+            console.log('URL для удаления:', url);
+            console.log('ID для удаления:', id);
+            await api.delete(url);
             await fetchRecommendations();
         } catch (error) {
             console.error("Ошибка удаления:", error);
@@ -57,8 +72,14 @@ const RecommendationPanel: React.FC = () => {
             };
 
             if (editRecommendation) {
-                await api.patch(API_ENDPOINTS.RECOMMENDATION.BY_ID(editRecommendation.id), updateData);
+                const url = API_ENDPOINTS.RECOMMENDATION.BY_ID(editRecommendation.id);
+                console.log('URL для обновления:', url);
+                console.log('ID для обновления:', editRecommendation.id);
+                console.log('Данные для обновления:', updateData);
+                await api.patch(url, updateData);
             } else {
+                console.log('URL для создания:', API_ENDPOINTS.RECOMMENDATION.BASE);
+                console.log('Данные для создания:', updateData);
                 await api.post(API_ENDPOINTS.RECOMMENDATION.BASE, updateData);
             }
             setIsModalVisible(false);
@@ -102,10 +123,10 @@ const RecommendationPanel: React.FC = () => {
                             setIsModalVisible(true);
                         }}
                     />
-                    <Button
-                        type="text"
-                        danger
-                        icon={<DeleteOutlined />}
+                    <Button 
+                        type="text" 
+                        danger 
+                        icon={<DeleteOutlined />} 
                         onClick={() => handleDelete(record.id)}
                     />
                 </Space>
@@ -125,7 +146,7 @@ const RecommendationPanel: React.FC = () => {
             <Table
                 dataSource={filteredRecommendations}
                 columns={columns}
-                rowKey={record => record.id}
+                rowKey="id"
             />
             <Modal
                 title={editRecommendation ? "Редактирование рекомендации" : "Новая рекомендация"}
