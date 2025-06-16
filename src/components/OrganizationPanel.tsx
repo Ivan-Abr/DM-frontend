@@ -10,14 +10,8 @@ import {
 } from 'recharts';
 import { API_ENDPOINTS } from '../config';
 import api from '../api';
-
-// Заглушки для примера
-const org = {
-  name: 'GazProm',
-  annotation:
-      'ПАО «Газпром» — глобальная энергетическая компания. Основные направления деятельности — геологоразведка, добыча, транспортировка, хранение, переработка и реализация газа, газового конденсата и нефти, реализация газа в качестве моторного топлива, а также производство и сбыт тепло- и электроэнергии.',
-  contacts: 'www.gazprom.ru',
-};
+import {ViewOrganizationDTO} from "../types";
+import {message} from "antd";
 
 interface LayerData {
   score: number;
@@ -41,6 +35,7 @@ const OrganizationPanel: React.FC = () => {
   const [layerData, setLayerData] = useState<LayerData[]>([]);
   const [layers, setLayers] = useState<{ [key: string]: Layer }>({});
   const [recommendations, setRecommendations] = useState<{ [key: string]: Recommendation }>({});
+  const [organization, setOrganizations] = useState<ViewOrganizationDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,6 +55,34 @@ const OrganizationPanel: React.FC = () => {
     };
     fetchLayers();
   }, []);
+
+  useEffect(() => {
+    const fetchOrganization = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        if (!id) {
+          throw new Error("Organization ID is missing");
+        }
+
+        const response = await api.get(API_ENDPOINTS.ORGANIZATION.BY_ID(id));
+
+        if (!response.data) {
+          throw new Error("Organization data not found");
+        }
+
+        setOrganizations(response.data);
+      } catch (error) {
+        console.error("Failed to fetch organization:", error);
+        setError(error instanceof Error ? error.message : "Failed to load organization");
+        message.error("Ошибка загрузки организации");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrganization();
+  }, [id]);
 
   // Загружаем ответы и рекомендации после загрузки слоев
   useEffect(() => {
@@ -147,15 +170,24 @@ const OrganizationPanel: React.FC = () => {
       </div>
     );
   }
+
+  if (!organization) {
+    return (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+          Organization data not available
+        </div>
+    );
+  }
+
   return (
     <div style={{ maxWidth: 900, margin: '40px auto', padding: 32, background: '#fff', borderRadius: 16, boxShadow: '0 2px 8px #e3eafc' }}>
-      <h2 style={{ color: '#1a237e', marginBottom: 24 }}>{org.name}</h2>
+      <h2 style={{ color: '#1a237e', marginBottom: 24 }}>{organization.name}</h2>
       <div style={{ marginBottom: 32 }}>
         <div style={{ marginBottom: 12 }}>
-          <b>Аннотация:</b> {org.annotation}
+          <b>Аннотация:</b> {organization.annotation}
         </div>
         <div style={{ marginBottom: 12 }}>
-          <b>Контакты:</b> {org.contacts}
+          <b>Контакты:</b> {organization.contacts}
         </div>
       </div>
       <div style={{ marginBottom: 32 }}>
