@@ -8,6 +8,7 @@ import { API_ENDPOINTS } from '../../config';
 
 const Register: React.FC = () => {
     const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -18,6 +19,7 @@ const Register: React.FC = () => {
         try {
             await api.post(API_ENDPOINTS.AUTH.REGISTER, {
                 username,
+                email,
                 password
             });
             navigate('/login');
@@ -46,6 +48,15 @@ const Register: React.FC = () => {
                     placeholder="Имя пользователя"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
+                    className={styles.input}
+                />
+            </div>
+            <div className={styles.formGroup}>
+                <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className={styles.input}
                 />
             </div>

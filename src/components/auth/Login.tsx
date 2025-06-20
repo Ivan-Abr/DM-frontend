@@ -28,11 +28,15 @@ const Login: React.FC = () => {
                 password
             });
             const token = response.data.token;
-            localStorage.setItem('authToken', response.data.token);
-
-
             const decoded: DecodedToken = jwtDecode(token);
             const roles = decoded.roles;
+
+            localStorage.setItem('authToken', token);
+
+            if (roles.includes('BANNED')) {
+                navigate('/welcome');
+                return;
+            }
 
             if (roles.includes('ROLE_ADMIN')) {
                 navigate('/admin-panel');
