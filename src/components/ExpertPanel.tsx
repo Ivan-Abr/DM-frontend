@@ -213,7 +213,7 @@ const ExpertPanel: React.FC = () => {
                           style={{ color: '#1a237e', borderColor: '#e3eafc' }}
                           onClick={() => navigate(`/organization/${org.id}/test`)}
                       >
-                        Начать опрос
+                        Тест
                       </Button>
                     </Space>
                   }
